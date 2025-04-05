@@ -1,8 +1,8 @@
 <script>
-	import { t, json } from 'svelte-i18n';
-	import { APP_TITLE } from '$lib/env';
+	import { t, json, locale } from 'svelte-i18n';
 	import { customData, isCustomBanner } from '$lib/store/app-stores';
 	import { highlightBannerName } from '$lib/helpers/nameText';
+	import { regionElement } from '$lib/helpers/gacha/itemdrop-base';
 
 	export let tplVersion = 'v1';
 	export let bannerType;
@@ -10,33 +10,36 @@
 	export let rateup;
 	export let weapons;
 	export let character;
+	export let drop5star = [];
+	export let region = null;
+
+	$: isSpecial = $locale.toLocaleLowerCase().match(/ja|cn/);
 
 	const charNameAndTitle = (name, vision) => {
 		const element = `(${$t(vision)})`;
-		return `"${$t(`${name}.title`)}" ${$t(`${name}.name`)} ${$t(element)}`;
+		if (isSpecial) return `「${$t(`${name}.title`)}·${$t(`${name}.name`)} ${element}」`;
+		return `"${$t(`${name}.title`)}" ${$t(`${name}.name`)} ${element}`;
 	};
 
 	const getFeaturedChars = ({ name, vision }) => {
-		if (!$isCustomBanner) {
-			return `<span class="custom ${vision}-flat">
-			"${$t(`${name}.title`)}" ${$t(`${name}.name`)} (${$t(vision)})
-		</span>`;
-		}
-
-		const { charTitle } = $customData;
-		return `<span class="custom ${vision}-flat">
-			"${charTitle}" ${name} (${$t(vision)})
-		</span>`;
+		const isCustom = $isCustomBanner;
+		const charTitle = !isCustom ? $t(`${name}.title`) : $customData.charTitle;
+		const charName = !isCustom ? $t(`${name}.name`) : name;
+		const nameTitle = isSpecial ? `${charTitle}·${charName}` : `"${charTitle}" ${charName} `;
+		return `<span class="custom ${vision}-flat"> ${nameTitle}(${$t(vision)}) </span>`;
 	};
 
-	const getFeaturedWeapon = ({ name, type }) => {
-		return `<span class="weapon"> ${$t(name)} (${$t(type)})</span>`;
+	const getFeaturedWeapon = ({ name, weaponType }) => {
+		const nameTitle = isSpecial
+			? `${$t(weaponType)}·${$t(name)}`
+			: `${$t(name)} (${$t(weaponType)})`;
+		return `<span class="weapon">${nameTitle}</span>`;
 	};
 
 	const getDelimiter = (arr, i) => {
 		if (i > arr.length - 2) return '';
-		if (i > arr.length - 3) return '&';
-		return ',';
+		if (i > arr.length - 3) return isSpecial ? '、' : '&';
+		return isSpecial ? '、' : ',';
 	};
 
 	const getRateupChars = (items) => {
@@ -48,11 +51,23 @@
 	};
 
 	const getRateupWeapons = (items) => {
-		const translated = items.map(({ name, type }, i) => {
-			return `<span class="stardust"> ${$t(name)} (${$t(type)})</span>
-			${getDelimiter(rateup, i)} `;
+		const translated = items.map(({ name, weaponType }, i) => {
+			const nameTitle = isSpecial
+				? `「${$t(weaponType)}·${$t(name)}」`
+				: `${$t(name)} (${$t(weaponType)})`;
+			return `<span class="stardust">${nameTitle}</span>${getDelimiter(rateup, i)} `;
 		});
 		return translated.join('');
+	};
+
+	const getRateupChron = (itemType) => {
+		const list = drop5star.filter(({ type }) => type === itemType);
+		const getItem = itemType === 'weapon' ? getFeaturedWeapon : getFeaturedChars;
+		const arrayString = list.map(({ name, weaponType: type, vision }) => {
+			return getItem({ name, type, vision });
+		});
+		const str = arrayString.join(',');
+		return str;
 	};
 
 	const valuesToToChange = {
@@ -79,25 +94,22 @@
 	};
 </script>
 
-<svelte:head>
-	<title>
-		{bannerName} | {$t('title', { default: APP_TITLE })}
-	</title>
-</svelte:head>
-
 <div class="description" class:v2={tplVersion === 'v2'}>
 	{#if tplVersion === 'v2'}
-		<h2><span>{$t('details.wishDetails')} </span> <span class="line" /></h2>
+		<h2>
+			<span>{$t('details.wishDetails')} </span> <span class="line" />
+		</h2>
 	{/if}
 
 	{#if bannerType === 'beginner'}
 		<h3>{$t('details.beginnerInfo')}</h3>
-	{:else if bannerType.match('event')}
+	{:else if bannerType.match(/event|chronicled/)}
 		<h3>{$t('details.limited')}</h3>
 	{:else}
 		<h3>{$t('details.permanent')}</h3>
 	{/if}
 
+	<!-- Beginner Wish Description -->
 	{#if bannerType === 'beginner'}
 		{@const { name, vision } = character}
 		{#each $json('details.beginner') as text}
@@ -112,6 +124,8 @@
 				})}
 			</p>
 		{/each}
+
+		<!-- Standard Wish Description -->
 	{:else if bannerType === 'standard'}
 		{#each $json('details.standard') as text}
 			<p>
@@ -120,6 +134,8 @@
 				})}
 			</p>
 		{/each}
+
+		<!-- Character Wish Description -->
 	{:else if bannerType === 'character-event'}
 		{#each $json('details.events') as text}
 			<p>
@@ -132,6 +148,8 @@
 				})}
 			</p>
 		{/each}
+
+		<!-- Weapon Wish Description -->
 	{:else if bannerType === 'weapon-event'}
 		{#each $json('details.weapons') as text}
 			<p>
@@ -145,10 +163,24 @@
 				})}
 			</p>
 		{/each}
+
+		<!-- Chronicled Wish Description -->
+	{:else if bannerType === 'chronicled'}
+		{#each $json('details.chronicled') as text}
+			<p>
+				{@html $t(text, {
+					values: {
+						bannerName: highlightBannerName(bannerName, regionElement(region)),
+						featuredCharacter: getRateupChron('character'),
+						featuredWeapon: getRateupChron('weapon')
+					}
+				})}
+			</p>
+		{/each}
 	{/if}
 
 	<p>
-		{#if bannerType.match(/(weapon|standard)/)}
+		{#if bannerType.match(/(weapon|standard|chronicled)/)}
 			{@html convertion('fiveStar')}
 		{/if}
 		{@html convertion('fourStar')}

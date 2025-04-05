@@ -10,7 +10,6 @@
 	export let weaponType;
 	export let useOutfit;
 	export let custom;
-	export let chineseChar;
 	export let clientHeight = 0;
 	export let clientWidth = 0;
 	export let offset = {};
@@ -23,7 +22,7 @@
 		{@const { artURL } = status === 'owned' ? images : hostedImages}
 		{@const { splashArt = {} } = artPosition || {}}
 		<div class="zoomist-image" style={pos(splashArt, clientHeight, clientWidth)}>
-			<img use:lazyLoad={artURL} alt={name} crossorigin="anonymous" />
+			<img use:lazyLoad={artURL} alt={name} />
 		</div>
 
 		<!-- Weapon -->
@@ -33,15 +32,13 @@
 			<img use:lazyLoad={$assets[name]} alt={name} class={weaponType} />
 		</div>
 
-	{:else if type === 'member'}
-		<div class="zoomist-image weapon anim {weaponType}-parent" use:removeAnimClass>
-			<img src={$assets[`bg-${weaponType}.webp`]} alt={weaponType} class="weaponbg" />
-			<p id="chinese-char">{chineseChar}</p>
-		</div>
+		<!-- Character OutFit -->
 	{:else if type === 'outfit'}
 		<div class="zoomist-image" style={pos(offset, clientHeight, clientWidth)}>
 			<img use:lazyLoad={$assets[`splash-art/${outfitName}`]} alt={name} crossorigin="anonymous" />
 		</div>
+
+		<!-- Character Art -->
 	{:else}
 		<div class="zoomist-image" style={pos(offset, clientHeight, clientWidth)}>
 			<img
@@ -76,20 +73,6 @@
 
 	.zoomist-image {
 		transform: translate(var(--translate-x, 0px), var(--translate-y, 0px)) scale(var(--scale, 0));
-	}
-
-	#chinese-char {
-		font-family: 'AaQiShu';
-		position: absolute;
-		top: 50%;
-		left: 45%;
-		transform: translate(-50%, -50%);
-		font-size: 20vh;
-		width: 10%;
-		word-wrap: break-word;
-		line-height: 85%;
-		color: #1e1e1e;
-		filter: drop-shadow(0.2rem 0.2rem 0.02rem rgb(0, 0, 0));
 	}
 
 	img {

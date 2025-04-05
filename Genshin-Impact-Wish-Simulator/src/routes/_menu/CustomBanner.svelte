@@ -15,6 +15,9 @@
 	import { randomNumber as rng } from '$lib/helpers/gacha/itemdrop-base';
 	import { playSfx } from '$lib/helpers/audio/audio';
 	import { pushToast } from '$lib/helpers/toast';
+	import { timeAgo } from '$lib/helpers/timeago';
+	import { maintenance } from '$lib/helpers/banner-custom';
+	import { html } from '$post/banner-guidelines.md';
 
 	import ButtonModal from '$lib/components/ButtonModal.svelte';
 	import Icon from '$lib/components/Icon.svelte';
@@ -143,33 +146,19 @@
 		{:else}
 			{#if showNote}
 				<div class="disclaimer" transition:fade|local={{ duration: 250 }}>
-					<article>
-						<p>
-							I will be monitoring this Feature over the coming period. If this feature is not found
-							to be useful or is misused to share inappropriate content, I may limit or even disable
-							it. I hope you are willing to provide feedback to help improve the quality of this
-							simulator site.
-						</p>
-						<p>
-							Every banner you add is saved in your browser's memory. <b>WishSimulator.App</b> does not
-							collect or store your banner data in cloud storage unless you click the Share Button.
-						</p>
-						<p>
-							<b>WishSimulator.App</b> does not collect your personal information. So, if an
-							incident occurs on your device and causes your browser to clear your local storage,
-							you will also lose all your data, and you will not be able to edit the banner(s) you
-							have created.
-							<u>In such a case, what you can do is create a new custom banner</u>.
-						</p>
-					</article>
-					<ButtonModal width="200px" on:click={toggleInfo}>Create Banner</ButtonModal>
+					<article>{@html html}</article>
+					<ButtonModal width="200px" on:click={toggleInfo}>
+						{$t('customBanner.create')}
+					</ButtonModal>
 				</div>
 			{:else}
 				<div class="row" transition:fade|local={{ duration: 250 }}>
 					{#if customList.length > 0}
-						{#each customList as { itemID, vision, complete, images = { }, hostedImages, isChanged, blocked }}
+						{#each customList as { itemID, vision, complete, images = { }, hostedImages, isChanged, blocked, lastSync, deleted }}
 							<div class="item" id={itemID}>
-								{#if hostedImages}
+								{#if deleted}
+									<i class="sync gi-cloud-deleted" />
+								{:else if hostedImages}
 									<i class="sync gi-{isChanged ? 'cloud-sync' : 'network'}" />
 								{/if}
 								<button
@@ -181,40 +170,65 @@
 									on:click={!complete ? null : () => wishBanner(itemID)}
 								>
 									<img
-										src={images?.thumbnail || $assets[`blank/${vision || 'pyro'}`]}
+										src={images?.thumbnail || $assets[`blank/character-${vision || 'pyro'}`]}
 										alt="Custom Banner"
 										crossorigin="anonymous"
 									/>
 								</button>
+								<div class="time">
+									{#if deleted}
+										<span> {$t('customBanner.inactive')} </span>
+									{:else if !lastSync}
+										<span>{$t('customBanner.unshared')} </span>
+									{:else}
+										<span>
+											{$t('customBanner.lastSync', { values: { time: timeAgo(lastSync) } })}
+										</span>
+									{/if}
+								</div>
 								<div class="action">
 									{#if !(customList.length > 3 && !$proUser) && !blocked}
 										<button class="edit" on:click={() => customizeBanner(itemID)}>
 											<i class="gi-pen" /> <span>{$t('customBanner.edit')}</span>
 										</button>
 									{/if}
-									<button class="delete" on:click={() => selectToDelete(itemID, images?.thumbnail)}>
-										<i class="gi-delete" /> <span>{$t('customBanner.delete')}</span>
-									</button>
+
+									{#if !maintenance}
+										<button
+											class="delete"
+											on:click={() => selectToDelete(itemID, images?.thumbnail)}
+										>
+											<i class="gi-delete" /> <span>{$t('customBanner.delete')}</span>
+										</button>
+									{/if}
 								</div>
 							</div>
 						{/each}
 					{/if}
 
-					{#if $proUser || customList.length < 3}
-						<div class="item blank">
-							<button class="add" on:click={() => customizeBanner()}>
-								<i class="gi-plus" />
-								<span>{$t('customBanner.addBanner')}</span>
-							</button>
-						</div>
+					{#if !maintenance}
+						{#if $proUser || customList.length < 3}
+							<div class="item blank">
+								<button class="add" on:click={() => customizeBanner()}>
+									<i class="gi-plus" />
+									<span>{$t('customBanner.addBanner')}</span>
+								</button>
+							</div>
+						{:else}
+							<div class="item blank locked">
+								<button class="add" on:click={() => selectMenu('proAccess')}>
+									<i class="gi-lock" />
+									<span>{$t('customBanner.memberToUnlock')}</span>
+								</button>
+							</div>
+						{/if}
 					{:else}
-						<div class="item blank locked">
-							<button class="add" on:click={() => selectMenu('proAccess')}>
-								<i class="gi-lock" />
-								<span>{$t('customBanner.memberToUnlock')}</span>
+						<div class="item blank locke disabled">
+							<button class="add" disabled>
+								<i class="gi-gear" />
+								<span>Some Features are Disabled for Maintenance!</span>
 							</button>
-						</div>
-					{/if}
+						</div>{/if}
 				</div>
 			{/if}
 			<!-- End ShowNote -->
@@ -293,9 +307,16 @@
 		background-color: #fff;
 		margin-bottom: 2%;
 		border-radius: 0.5rem;
+		font-size: 90%;
 	}
-	p {
+
+	.disclaimer :global(p) {
 		margin-bottom: 3%;
+	}
+	.disclaimer :global(ol),
+	.disclaimer :global(ul) {
+		line-height: 1.5;
+		list-style-position: inside;
 	}
 
 	/*  */
@@ -340,6 +361,9 @@
 		.item {
 			width: 45%;
 		}
+		article {
+			font-size: 120%;
+		}
 	}
 
 	.banner-item {
@@ -368,7 +392,8 @@
 		content: attr(data-text);
 		opacity: 1;
 		background-color: rgba(0, 0, 0, 0.5);
-		border-color: transparent;
+		border: none;
+		border-radius: unset;
 		color: rgba(255, 255, 255, 0.85);
 		display: flex;
 		justify-content: center;
@@ -389,6 +414,10 @@
 		font-size: calc(0.065 * var(--item-width));
 	}
 
+	.gi-cloud-deleted {
+		background-color: #da2133;
+		color: #fff;
+	}
 	.gi-cloud-sync {
 		background-color: #eac343;
 	}
@@ -401,6 +430,13 @@
 		width: 100%;
 		height: 100%;
 		object-fit: cover;
+	}
+
+	.time {
+		font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+		font-style: italic;
+		font-size: 90%;
+		text-align: center;
 	}
 
 	.action {
@@ -455,7 +491,7 @@
 		transition: border 0.25s;
 		border: 2px dashed #c3b8a5;
 	}
-	.item.blank:hover {
+	.item.blank:not(.disabled):hover {
 		border-color: #857d71;
 	}
 
@@ -471,7 +507,7 @@
 		transition: color 0.25s;
 	}
 
-	.add:hover {
+	.item:not(.disabled) .add:hover {
 		color: #857d71;
 	}
 

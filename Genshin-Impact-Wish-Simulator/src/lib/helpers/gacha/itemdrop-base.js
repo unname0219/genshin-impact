@@ -1,14 +1,24 @@
 import { standard } from '$lib/data/banners/standard.json';
 import { data as weaponsDB } from '$lib/data/weapons.json';
 import { data as charsDB, onlyStandard } from '$lib/data/characters.json';
-// import { data as memberDB } from '$lib/data/members.json';
-import { memberDB } from '../member-loader';
 import { getRate, prob } from './probabilities';
 import { guaranteedStatus } from '../dataAPI/api-localstore';
 
+export const regionElement = (region) => {
+	const base = {
+		mondstadt: 'anemo',
+		liyue: 'geo',
+		inazuma: 'electro',
+		sumeru: 'dendro',
+		fontaine: 'hydro',
+		natlan: 'pyro',
+		snezhnaya: 'cryo'
+	};
+	return base[region];
+};
 
-const standardWeapons = (star) => {
-	return getAllWeapons(star).filter(({ limited }) => !limited);
+const standardWeapons = (star, includes = []) => {
+	return getAllWeapons(star).filter(({ limited, name }) => !limited || includes.includes(name));
 };
 
 const filterByReleased = (charlist, version = null, phase = null) => {
@@ -34,30 +44,14 @@ export const randomNumber = (min = 1, max = 9) => {
 const getAllChars = (star) => {
 	return charsDB
 		.filter(({ rarity }) => rarity === star)
-		.map((arr) => {
-			arr.type = 'character';
-			return arr;
-		});
+		.map((arr) => ({ type: 'character', ...arr }));
 };
 
 const getAllWeapons = (star) => {
 	return weaponsDB
 		.filter(({ rarity }) => rarity === star)
-		.map((arr) => {
-			arr.type = 'weapon';
-			return arr;
-		});
+		.map((arr) => ({ type: 'weapon', ...arr }));
 };
-
-export const getMemberItem = () => {
-	return memberDB
-		.map((arr) => {
-			arr.type = 'member';
-			arr.weaponType = "catalyst";
-			// arr.rarity = 3;
-			return arr;
-		}); 
-}
 
 export const getCharDetails = (charName) => {
 	if (!charName) return {};
@@ -71,6 +65,15 @@ export const getWpDetails = (weaponName) => {
 	return findWP || {};
 };
 
+export const getDetails = (itemName) => {
+	if (!itemName) return {};
+	const characterList = charsDB.map((d) => ({ type: 'character', ...d }));
+	const weaponList = weaponsDB.map((d) => ({ type: 'weapon', ...d }));
+	const list = [...characterList, ...weaponList];
+	const findItems = list.find(({ name }) => itemName === name);
+	return findItems || {};
+};
+
 const char4starList = (banner) => {
 	if (banner === 'standard') return getAllChars(4);
 	return getAllChars(4).filter(({ name }) => !onlyStandard.includes(name));
@@ -80,6 +83,7 @@ export const get3StarItem = () => standardWeapons(3);
 
 export const get4StarItem = ({
 	banner = 'standard',
+	region = null,
 	version = null,
 	phase = null,
 	type = null,
@@ -102,58 +106,75 @@ export const get4StarItem = ({
 
 	// General Wish Result
 	let items;
+	const isChron = banner === 'chronicled';
+	const lsChars = isChron ? getAllChars(4) : char4starList(banner);
+	const lsWp = isChron ? getAllWeapons(4) : standardWeapons(4);
+
 	if (type == 'all') {
-		items = [...char4starList(banner), ...standardWeapons(4)];
+		items = [...lsChars, ...lsWp];
 	} else if (type === 'character') {
-		items = char4starList(banner);
+		items = lsChars;
 	} else if (type === 'weapon') {
-		items = standardWeapons(4);
+		items = lsWp;
 	} else {
 		const charRate = getRate(banner, 'charRate');
 		const { itemType } = prob([
 			{ itemType: 'char', chance: charRate },
 			{ itemType: 'wp', chance: 100 - charRate }
 		]);
-		items = itemType === 'wp' ? standardWeapons(4) : char4starList(banner);
+		items = itemType === 'wp' ? lsWp : lsChars;
 	}
 
-	const filtered = filterByReleased(items, version, phase);
-	const itemList = filtered.filter(({ name }) => !rateupNamelist.includes(name));
-	return itemList;
+	const result = filterByReleased(items, version, phase);
+	// General Result
+	if (!isChron) return result.filter(({ name }) => !rateupNamelist.includes(name));
+	// chronicled Result
+	return result.filter(({ origin, name }) => origin === region || rateupNamelist.includes(name));
 };
 
-const std5StarCharlist = (stdver = 1) => {
+const std5StarCharlist = (stdver = 1, includes = []) => {
 	const { characters: stdCharNames } = standard.find(({ version }) => version === stdver);
-	const resultList = getAllChars(5).filter(({ name }) => stdCharNames.includes(name));
-	return resultList;
+	return getAllChars(5).filter(({ name }) => {
+		return stdCharNames.includes(name) || includes.includes(name);
+	});
 };
 
 export const get5StarItem = ({
 	banner = 'standard',
+	region = null,
 	stdver = 1,
 	type = null,
 	useRateup = false,
 	rateupItem = [],
 	customData = {}
 } = {}) => {
-	// Featured Char Result
-	if (useRateup && banner === 'character-event') {
+	// Featured or selected Character Result
+	if (useRateup && banner.match(/character|chronicled/)) {
 		if (Object.keys(customData).length > 0) {
 			const { vision, character, artPosition, itemID } = customData;
-			const result = {
-				vision,
-				itemID,
-				name: character,
-				offset: artPosition || {},
-				type: 'character',
-				rarity: 5,
-				custom: true
-			};
-			return result;
+			const result = { name: character, offset: artPosition || {}, type: 'character' };
+			return { vision, itemID, rarity: 5, custom: true, ...result };
+		}
+		const loadItems = type === 'weapon' ? getAllWeapons : getAllChars;
+		const featured = loadItems(5).find(({ name }) => name === rateupItem[0]);
+		return featured || {};
+	}
+
+	// Losing Chronicled Result
+	if (banner.match('chronicled')) {
+		let resultList = [];
+		if (!type || type === 'all') {
+			resultList = [...std5StarCharlist(stdver, rateupItem), ...standardWeapons(5, rateupItem)];
+		} else if (type === 'weapon') {
+			resultList = standardWeapons(5, rateupItem);
+		} else {
+			resultList = std5StarCharlist(stdver, rateupItem);
 		}
 
-		const featured = getAllChars(5).find(({ name }) => name === rateupItem[0]);
-		return featured;
+		const filtered = resultList.filter(({ origin, name }) => {
+			return origin === region || rateupItem.includes(name);
+		});
+		return filtered;
 	}
 
 	// Featured Weapon Result
@@ -194,7 +215,7 @@ export const get5StarItem = ({
 		return resultList;
 	}
 
-	// Character List while lose on character banner
+	// Character Banner Result while lose on character banner
 	return std5StarCharlist(stdver).filter(({ name }) => !rateupItem.includes(name));
 };
 

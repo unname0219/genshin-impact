@@ -1,56 +1,42 @@
 <script>
-	import { getContext, onDestroy, onMount } from 'svelte';
+	import { getContext, onDestroy, onMount, setContext } from 'svelte';
 	import { fade, fly } from 'svelte/transition';
-	import OverlayScrollbars from 'overlayscrollbars';
-	import { t, json } from 'svelte-i18n';
+	import { t } from 'svelte-i18n';
+	import hotkeys from 'hotkeys-js';
 	import {
-		bannerList,
 		viewportWidth,
-		viewportHeight,
 		activeVersion,
-		activeBanner,
+		course,
 		assets,
-		course
+		viewportHeight,
+		bannerList,
+		activeBanner,
+		chronicledCourse
 	} from '$lib/store/app-stores';
 	import { fatepointManager } from '$lib/helpers/dataAPI/api-localstore';
 	import { playSfx } from '$lib/helpers/audio/audio';
 
 	import Modal from '$lib/components/ModalTpl.svelte';
-	import ButtonModal from '$lib/components/ButtonModal.svelte';
-	import FatepointSVG from './_svg-background.svelte';
-	import InventoryItem from '../../_inventory/_inventory-item.svelte';
-	import hotkeys from 'hotkeys-js';
-	import { getWpDetails } from '$lib/helpers/gacha/itemdrop-base';
+	import ItemSelection from './_item-selection.svelte';
+	import Description from './_description.svelte';
 
-	$: half = $viewportWidth < 500;
-	const weapons = $bannerList[$activeBanner].featured.map(({ name }) => getWpDetails(name));
-
+	let activeSection = 1;
+	let clientHeight;
 	let itemWidth;
+	$: half = $viewportWidth < 500;
 	$: defaultItemWidth = (16.5 / 100) * $viewportHeight;
 	$: if (itemWidth < 150) itemWidth = 150;
 	else itemWidth = defaultItemWidth;
 
-	let clientWidth;
-	let content;
-	let weaponName = '';
-	let selectedCourse = -1;
+	const { type: banner } = $bannerList[$activeBanner];
+	const { patch, phase } = $activeVersion;
 
-	onMount(() => {
+	const flipSection = (to) => {
 		playSfx('bookflip');
-		OverlayScrollbars(content, { sizeAutoCapable: false, className: 'os-theme-light' });
-		course.subscribe(({ selected }) => {
-			weaponName = weapons[selected]?.name;
-			selectedCourse = selected;
-		});
-	});
-
-	// Target Course
-	let targetActive = null;
-	const select = (i) => {
-		playSfx('click2');
-		targetActive = i;
+		activeSection = to;
 	};
 
+	onMount(() => playSfx('bookflip'));
 	const handleClose = getContext('handleEpitomizedModal');
 	const closePath = () => {
 		handleClose();
@@ -58,69 +44,40 @@
 		playSfx('bookflip');
 	};
 
+	let showCancelConfirmation = false;
 	const closeModal = () => {
 		playSfx('close');
 		showCancelConfirmation = false;
 	};
 
-	let showCancelConfirmation = false;
-	const cancelCourse = () => {
+	setContext('cancelCourse', () => {
 		showCancelConfirmation = true;
 		playSfx();
-	};
+	});
 
-	const setCourse = () => {
-		if (targetActive === null) return;
-
+	setContext('setCourse', (target) => {
+		if (target === null) return;
 		playSfx('click');
 		const { patch, phase } = $activeVersion;
-
-		// set to local
 		const localFate = fatepointManager.init({ version: patch, phase });
-		localFate.set(0, targetActive);
-
-		// set to App
-		course.set({ selected: targetActive, point: 0 });
+		localFate.set(0, target); // set to local
+		course.set({ selected: target, point: 0 }); // set to App
 		handleClose();
-	};
+	});
 
 	const confirmCancel = () => {
-		playSfx();
-		const { patch, phase } = $activeVersion;
+		showCancelConfirmation = false;
+		closePath();
+
 		// clear local
-		const localFate = fatepointManager.init({ version: patch, phase });
+		const localFate = fatepointManager.init({ version: patch, phase, banner });
 		localFate.remove();
 
-		// clear App
-		course.set({ point: 0, selected: null });
-
-		targetActive = null;
-		showCancelConfirmation = false;
-		handleClose();
+		// clear browser Storage
+		if (banner.match('weapon')) return course.set({ point: 0, selected: null });
+		chronicledCourse.set({ selected: null, point: 0, type: null });
 		return;
 	};
-
-	// Shortcut
-	hotkeys('left,right', 'epipath', (e) => {
-		e.preventDefault();
-		if (weaponName) return;
-
-		playSfx('click2');
-		const [key] = hotkeys.getPressedKeyString();
-		const to = key.toLocaleLowerCase();
-		if (to === 'left') {
-			targetActive = targetActive <= 0 ? 1 : targetActive - 1;
-		}
-		if (to === 'right') {
-			targetActive = targetActive >= 1 ? 0 : targetActive + 1;
-		}
-	});
-
-	hotkeys('enter', 'epipath', (e) => {
-		e.preventDefault();
-		if (targetActive === null) return;
-		setCourse();
-	});
 
 	hotkeys('esc,e', 'epipath', (e) => {
 		e.preventDefault();
@@ -148,93 +105,53 @@
 	</Modal>
 {/if}
 
-<section class="modal" style="height:{$viewportHeight}px" transition:fade={{ duration: 250 }}>
+<section class="modal" transition:fade={{ duration: 250 }}>
 	<div
 		class="modal-content"
-		bind:clientWidth
-		style="--modal-width: {clientWidth}px"
+		style="--modal-height:{clientHeight}px;--item-width: {itemWidth}px"
+		class:half
+		bind:clientHeight
 		transition:fly={{ y: 40, duration: 250 }}
 	>
-		<img src={$assets[`fatepointbook${half ? '-half' : ''}.webp`]} alt="Fatepoint Background" />
+		<img src={$assets[`epitomized-${half ? 'half' : 'bg'}.webp`]} alt="Epitomized Book" />
 		<button class="close-modal" on:click={closePath}>
 			<i class="gi-close" />
 		</button>
 		<div class="container">
-			{#if !half}
-				<div class="description">
-					<h1>{$t('epitomizedPath.heading')}</h1>
-					<div class="content" bind:this={content}>
-						{#each $json('epitomizedPath.description') as desc}
-							<p>
-								· {@html desc}
-							</p>
-						{/each}
-					</div>
-				</div>
+			{#if !half || activeSection < 1}
+				<Description isChronicled={banner === 'chronicled'} />
 			{/if}
-			<div class="weapon-selector" class:counter={weaponName}>
-				<div class="bg">
-					<FatepointSVG mode={weaponName ? 'counter' : 'bg'} />
-				</div>
-				<div class="top">{$t('epitomizedPath.selectWeapon')}</div>
-				<div class="weapon-item">
-					<div class="weapon-list" style="--item-width: {itemWidth}px">
-						{#if weaponName}
-							<div class="weapon-content">
-								<button>
-									<InventoryItem
-										itemdata={{
-											name: weaponName,
-											weaponType: weapons[selectedCourse].weaponType,
-											type: 'weapon',
-											rarity: 5
-										}}
-									/>
-								</button>
-							</div>
-						{:else}
-							{#each weapons as { name, weaponType }, i}
-								<div
-									class="weapon-content"
-									class:active={targetActive === i}
-									on:click={() => select(i)}
-								>
-									<button>
-										<InventoryItem itemdata={{ name, weaponType, type: 'weapon', rarity: 5 }} />
-									</button>
-								</div>
-							{/each}
-						{/if}
-					</div>
-					<div class="text">
-						<div>
-							{#if weaponName}
-								{$t('epitomizedPath.fatePoint')} : <span>{$course.point}</span>/2
-							{:else if targetActive === null}
-								{$t('epitomizedPath.selectWeapon')}
-							{:else}
-								{@html $t('epitomizedPath.chartCourseOf', {
-									values: {
-										target: `<span> ${$t(weapons[targetActive].name)} </span>`
-									}
-								})}
-							{/if}
-						</div>
-					</div>
-				</div>
-				<div class="button">
-					{#if weaponName}
-						<ButtonModal on:click={cancelCourse} type="cancel">
-							{$t('epitomizedPath.cancelCourse')}
-						</ButtonModal>
-					{:else}
-						<ButtonModal on:click={setCourse} disabled={targetActive === null}>
-							{$t('epitomizedPath.chartCourse')}
-						</ButtonModal>
-					{/if}
-				</div>
-			</div>
+
+			{#if (activeSection > 0 && half) || !half}
+				<ItemSelection />
+			{/if}
 		</div>
+
+		{#if half}
+			<div class="pagination">
+				{#if activeSection > 0}
+					<button
+						class="left"
+						style="margin-right: auto;"
+						on:click={() => flipSection(0)}
+						transition:fade|local={{ duration: 200 }}
+					>
+						<i class="gi-arrow-left" />
+					</button>
+				{/if}
+
+				{#if activeSection < 1}
+					<button
+						class="right"
+						style="margin-left: auto;"
+						on:click={() => flipSection(1)}
+						transition:fade|local={{ duration: 200 }}
+					>
+						<i class="gi-arrow-right" />
+					</button>
+				{/if}
+			</div>
+		{/if}
 	</div>
 </section>
 
@@ -244,6 +161,7 @@
 		top: 0;
 		left: 0;
 		width: 100vw;
+		height: var(--screen-height);
 		background-color: rgba(0, 0, 0, 0.7);
 		z-index: 10;
 		display: flex;
@@ -253,13 +171,18 @@
 	}
 
 	.modal-content {
-		width: 1000px;
 		max-width: 90%;
+		max-height: 90%;
+		width: 1100px;
 		min-width: 250px;
+		aspect-ratio: 919/549;
 		text-align: center;
 		position: relative;
-		border-radius: 1.2rem;
 		overflow: hidden;
+	}
+
+	.modal-content.half {
+		aspect-ratio: 599/719;
 	}
 
 	:global(.mobile) .modal-content {
@@ -274,12 +197,12 @@
 
 	.close-modal {
 		position: absolute;
-		top: 1.5rem;
-		right: -0.2rem;
+		top: calc(0.045 * var(--modal-height));
+		right: calc(0.045 * var(--modal-height));
 		z-index: +10;
 	}
+
 	.gi-close {
-		font-size: 1.3rem;
 		background-color: transparent;
 		color: #383b40;
 	}
@@ -292,185 +215,36 @@
 		left: 0;
 	}
 
-	.container h1 {
-		text-align: left;
-		padding-left: 10%;
-		padding-top: 5%;
-		font-size: calc(3 / 100 * var(--modal-width));
-		color: #7c613f;
-	}
-
-	.container > div {
+	.container > :global(div) {
 		flex-basis: 50%;
 		flex-grow: 1;
-		padding: 3% 7%;
 	}
 
-	.description {
-		padding-right: 5.5% !important;
-		font-size: calc(2 / 100 * var(--modal-width));
-	}
-
-	.container .content {
-		width: 100%;
-		height: 82%;
-		overflow: hidden;
-		margin: 8% 0 0;
-		text-align: left;
-		color: #aa8e77;
-	}
-
-	.weapon-selector {
-		display: flex;
-		flex-direction: column;
-		height: 100%;
-		color: #383b40;
-	}
-	.weapon-selector,
-	.weapon-selector > div {
-		position: relative;
-		padding: 5%;
-	}
-	.weapon-selector .bg {
-		position: absolute;
-		width: 90%;
-		top: 50%;
-		left: 50%;
-		transform: translate(-50%, -50%);
-	}
-	.counter.weapon-selector .bg {
-		width: 110%;
-		top: 48%;
-	}
-
-	.top {
-		font-size: calc(3 / 100 * var(--modal-width));
-		white-space: nowrap;
-	}
-
-	.weapon-item {
-		display: flex;
-		flex-direction: column;
-		height: 100%;
-		border: solid #dcd8cd;
-		border-width: 3px 0;
-		font-size: x-large;
-		padding-left: 0 !important;
-		padding-right: 0 !important;
-	}
-
-	.counter .weapon-item {
-		border: 0;
-	}
-
-	.weapon-list {
-		height: 100%;
-		width: 100%;
-		padding: 0 10%;
-		background-color: #dcd8cd;
-		display: flex;
-		justify-content: center;
-		align-items: center;
-		overflow: hidden;
-		text-align: center;
-		color: #3a4156;
-		line-height: 1.2rem;
-	}
-	.counter .weapon-list {
-		background-color: transparent;
-	}
-
-	.weapon-content {
-		display: inline-block;
-		padding: 5%;
-		width: 50%;
-	}
-
-	.weapon-content button {
-		font-size: small;
-		aspect-ratio: 8.75 / 10;
-		position: relative;
-		vertical-align: middle;
-		width: 100%;
-	}
-	:global(.mobile) .weapon-content button {
-		font-size: xx-small;
-	}
-
-	.weapon-content.active button::after,
-	.weapon-content.active button::before {
-		position: absolute;
-		right: 0;
-		top: 0;
-	}
-
-	.weapon-content.active button::after {
-		display: block;
-		content: '';
-		width: 100%;
-		height: calc(100% - 0.4rem);
-		border: solid #bed634;
-		border-width: 0.2rem 0;
-		border-radius: 0.3rem;
-	}
-	.weapon-content.active button::before {
-		content: '✔';
-		font-size: 1.2rem;
-		color: #759a28;
-		display: flex;
-		justify-content: center;
-		align-items: center;
-		background-color: #bed634;
-		width: 20%;
-		height: 20%;
-		z-index: +1;
-		border-top-right-radius: 0.5em;
-	}
-
-	.text {
-		margin-top: auto;
-		height: 40%;
-		display: flex;
-		justify-content: center;
-		align-items: center;
-	}
-	span,
-	p :global(span),
-	.text :global(span) {
+	span {
 		color: #f0b164;
 	}
-
-	.counter .text {
-		height: unset;
-		margin-bottom: -1rem;
-	}
-
 	button i {
 		width: 2rem;
 		height: 2rem;
-		background-color: #353533;
 		border-radius: 100%;
 		display: inline-flex;
 		justify-content: center;
 		align-items: center;
-		font-size: 1rem;
-		margin-right: 2rem;
+		font-size: 1.3rem;
 	}
 
-	@media screen and (max-width: 800px) and (min-width: 500px) {
-		.weapon-item {
-			font-size: medium;
-		}
+	/* pagination */
+	.pagination {
+		position: absolute;
+		top: 50%;
+		left: 0;
+		width: 100%;
+		display: flex;
+		padding: 0 2.5%;
+		z-index: +10;
 	}
 
-	:global(.mobile) .text {
-		height: 30%;
-	}
-	:global(.mobile) .counter .text {
-		height: unset;
-		margin-bottom: -1rem;
-	}
-	:global(.mobile) .weapon-item {
-		font-size: small;
+	.pagination button i {
+		font-size: 1.75rem;
 	}
 </style>

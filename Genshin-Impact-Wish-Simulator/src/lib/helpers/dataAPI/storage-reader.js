@@ -10,12 +10,10 @@ import {
 	starglitter,
 	intertwined,
 	multipull,
-	preloadVersion,
-	memberList
+	preloadVersion
 } from '$lib/store/app-stores';
-import { localBalance, rollCounter, localConfig, localMemberList } from './api-localstore';
+import { localBalance, rollCounter, localConfig } from './api-localstore';
 import { noticeMark } from '../noticeMark';
-import { memberDB } from '../member-loader';
 
 /**
  * Read Balance From LocalStorage
@@ -51,9 +49,6 @@ export const importLocalConfig = () => {
 
 	const lMulti = localConfig.get('multipull');
 	multipull.set(lMulti || 10);
-
-	const lMemberList = localMemberList.get();
-	memberList.set(lMemberList);
 };
 
 /**

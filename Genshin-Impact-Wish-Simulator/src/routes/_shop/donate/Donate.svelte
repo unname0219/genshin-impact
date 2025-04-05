@@ -1,5 +1,7 @@
 <script>
 	import { fade, fly } from 'svelte/transition';
+	import { assets } from '$lib/store/app-stores';
+	import { timeAgo } from '$lib/helpers/timeago';
 	import { supporterList } from '$lib/helpers/donation';
 	import { copy } from '$lib/helpers/nameText';
 	import { playSfx } from '$lib/helpers/audio/audio';
@@ -7,7 +9,6 @@
 	import Modal from '$lib/components/ModalTpl.svelte';
 	import ShopGroup from '../_shop-group.svelte';
 	import ShopGroupItem from '../_shop-group-item.svelte';
-	import { assets } from '$lib/store/app-stores';
 
 	let showCryptoModal = false;
 	let showToast = false;
@@ -33,15 +34,63 @@
 </script>
 
 <!-- Crypto Donate -->
-<div>
-	<img class='qr' src={$assets[`alipay.jpg`]} alt="alipay" />
+{#if showCryptoModal}
+	<Modal title="Support With Crypto" on:confirm={dimiss} on:cancel={dimiss}>
+		<div class="modal-donate">
+			<div class="pop-item">
+				<div class="icon">
+					<img src={$assets['donate-ethereum.png']} alt="Ethereum" />
+				</div>
+				<div class="address">
+					<span> Ethereum ( erc20 ) </span>
+					<input type="text" value="0x4320025BAD621c03b906A84c531B10480A465184" disabled />
+				</div>
+				<div class="copy">
+					<button on:click={() => copyHandle('0x4320025BAD621c03b906A84c531B10480A465184')}>
+						<i class="gi-copy" />
+					</button>
+				</div>
+			</div>
 
-	<img class='qr2' src={$assets[`wechatpay.jpg`]} alt="wechatpay" />
-</div>
+			<div class="pop-item">
+				<div class="icon">
+					<img src={$assets['donate-bnb.png']} alt="Binance Coin" />
+				</div>
+				<div class="address">
+					<span> Binance Coin ( bep20 )</span>
+					<input type="text" value="0x4320025BAD621c03b906A84c531B10480A465184" disabled />
+				</div>
+				<div class="copy">
+					<button on:click={() => copyHandle('0x4320025BAD621c03b906A84c531B10480A465184')}>
+						<i class="gi-copy" />
+					</button>
+				</div>
+			</div>
+
+			<div class="pop-item">
+				<div class="icon">
+					<img src={$assets['donate-solana.png']} alt="Solana" />
+				</div>
+				<div class="address">
+					<span> Solana </span>
+					<input type="text" value="4nFhLoPqpx71xPqgN2zhvoWtmgogzoDkEBzNKqjnpm2a" disabled />
+				</div>
+				<div class="copy">
+					<button on:click={() => copyHandle('4nFhLoPqpx71xPqgN2zhvoWtmgogzoDkEBzNKqjnpm2a')}>
+						<i class="gi-copy" />
+					</button>
+				</div>
+			</div>
+
+			{#if showToast}
+				<div class="toast" transition:fly={{ y: 10 }}>Address Copied</div>
+			{/if}
+		</div>
+	</Modal>
+{/if}
 
 <!-- Crypto Donate -->
 <div class="container">
-
 	<ShopGroup>
 		<ShopGroupItem>
 			<a
@@ -62,11 +111,11 @@
 			</a>
 		</ShopGroupItem>
 
-		<!-- Donaate By Saweria -->
+		<!-- Donate By Trakteer -->
 		<ShopGroupItem>
 			<a
-				class="content Saweria"
-				href="https://saweria.co/AguzzTN54"
+				class="content trakteer"
+				href="https://trakteer.id/mantan21"
 				target="_blank"
 				in:fade={{ duration: 300, delay: Math.sqrt(1 * 5000) }}
 			>
@@ -74,12 +123,15 @@
 					style="display: flex;justify-content: center; align-items: center; width: 100%; height: 100%"
 				>
 					<div class="donate-icon">
-						{#each ['ovo', 'dana', 'linkaja'] as im}
-							<img src={$assets[`donate-${im}.png`]} alt="{im} icon" />
-						{/each}
+						<img
+							style="height: 2.2rem;"
+							src={$assets[`donate-trakteer.png`]}
+							alt="Indonesian Payment"
+						/>
+						<img src={$assets[`donate-card.png`]} alt="Indonesian Payment" />
 					</div>
 				</div>
-				<span> Support me on Saweria </span>
+				<span> Support me on Trakteer </span>
 			</a>
 		</ShopGroupItem>
 
@@ -103,7 +155,31 @@
 			</button>
 		</ShopGroupItem>
 	</ShopGroup>
+
 	<!-- List Of Supporters -->
+	<div class="recent">
+		{#await supporterList() then listOfSupporters}
+			{#if listOfSupporters.length > 0}
+				{#each listOfSupporters as { name, message, amount, date, type }}
+					{@const platform =
+						type === 'tip' ? 'trakteer' : type === 'donation' ? 'saweria' : 'ko-fi'}
+					<div class="donation-item {platform}" in:fade={{ duration: 300 }}>
+						<div class="supporter">
+							<div class="info">
+								<div class="name">New support from <span> {name} </span></div>
+								<span class="message">{message ? `"${message}"` : ''}</span>
+								<span class="platform">✧ &nbsp; via {platform}</span>
+								<span class="time"> ✧ &nbsp; {timeAgo(date)}</span>
+							</div>
+							<div class="amount">
+								<span>{amount}</span>
+							</div>
+						</div>
+					</div>
+				{/each}
+			{/if}
+		{/await}
+	</div>
 </div>
 
 <style>
@@ -196,16 +272,6 @@
 		justify-content: center;
 		align-items: center;
 	}
-	.qr {
-		width: 14.5%;
-		height: 14.5%;
-	}
-
-	.qr2 {
-		width: 16%;
-		height: 16%;
-	}
-
 	img {
 		height: 1.5rem;
 		margin: 0.2rem 0.5rem;
@@ -302,18 +368,25 @@
 		padding: 0.4rem 1rem;
 	}
 
-	.ko-fi .platform {
-		color: #127399;
-		margin-right: 0.5rem;
-	}
-	.sociabuzz .platform {
-		color: #4f8d28;
+	.platform {
+		text-transform: capitalize;
 		margin-right: 0.5rem;
 	}
 
+	.ko-fi .platform {
+		color: #127399;
+	}
+	.sociabuzz .platform {
+		color: #4f8d28;
+	}
 	.saweria .platform {
 		color: rgb(213, 142, 18);
-		margin-right: 0.5rem;
+	}
+	.trakteer .platform {
+		color: #be1e2d;
+	}
+	.patreon .platform {
+		color: #f96854;
 	}
 
 	.time {
@@ -336,8 +409,10 @@
 	.donation-item.saweria .amount span {
 		background-color: #e2a12d;
 	}
-
 	.donation-item.sociabuzz .amount span {
 		background-image: linear-gradient(45deg, #3fa9f5 30%, #78c845);
+	}
+	.donation-item.trakteer .amount span {
+		background-color: #be1e2d;
 	}
 </style>

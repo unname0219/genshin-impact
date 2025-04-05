@@ -42,14 +42,9 @@
 		readyToPull.set(true);
 		onProgress = false;
 	};
-
-	if (!ready) {
-		preloadMeteor();
-	}
-
 </script>
 
-<!-- {#if !ready}
+{#if !ready}
 	<div class="tooltip" transition:fade={{ duration: 250 }}>
 		{#if onProgress}
 			<div class="loader">
@@ -80,7 +75,7 @@
 			</div>
 		{/if}
 	</div>
-{/if} -->
+{/if}
 
 <style>
 	.tooltip {

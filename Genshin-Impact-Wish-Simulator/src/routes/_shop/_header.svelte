@@ -46,7 +46,7 @@
 			</button>
 		{/if}
 		{#if activeShop === 'donate'}
-			<span> 随便给点吧, 我买东西吃. </span>
+			<span> Thank you for every donation you have given to me, I realy appreciate it.</span>
 		{:else}
 			<span> {$t('shop.noLimitTime')} </span>
 		{/if}

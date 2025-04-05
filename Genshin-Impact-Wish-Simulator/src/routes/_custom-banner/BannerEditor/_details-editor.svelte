@@ -6,6 +6,7 @@
 	import { playSfx } from '$lib/helpers/audio/audio';
 	import { getCharDetails } from '$lib/helpers/gacha/itemdrop-base';
 
+	import ToolTip from '$lib/components/ToolTip.svelte';
 	import InventoryItem from '../../_inventory/_inventory-item.svelte';
 	import RateupPicker from './_rateup-picker.svelte';
 	import PreviewGenerator from './_preview-generator.svelte';
@@ -18,6 +19,7 @@
 	export let watermark = '';
 
 	let showCharPicker = false;
+	let charPosition = -1;
 	let headerHeight;
 	let rowWidth;
 	$: itemWidth = rowWidth / 4;
@@ -54,25 +56,29 @@
 		playSfx('close');
 	};
 
-	const openRateupPicker = () => {
+	const openRateupPicker = (index) => {
 		showCharPicker = true;
+		charPosition = index;
 		playSfx('click');
 	};
 
 	// Rateup Picker
+	$: rateUpList = ['', '', ''].map((x, i) => rateup[i] || '');
 	const selectChar = (charName) => {
 		showCharPicker = false;
 		if (!charName) return;
 		if (rateup.includes(charName)) return;
-		if (rateup.length >= 3) return;
-		setRateup([...rateup, charName]);
+		const newArray = rateUpList.map((v, i) => (i !== charPosition ? v : charName));
+		setRateup(newArray);
+		charPosition = -1;
 	};
 	setContext('selectChar', selectChar);
 
 	const removeChar = (charName) => {
 		playSfx('close');
-		const afterRemoved = rateup.filter((n) => charName != n);
+		const afterRemoved = rateUpList.map((v) => (charName !== v ? v : ''));
 		setRateup(afterRemoved);
+		charPosition = -1;
 	};
 </script>
 
@@ -95,13 +101,16 @@
 		<div class="body" bind:clientWidth={rowWidth} style="--item-width:{itemWidth}px">
 			<div class="body-wrapper">
 				<div class="field-group">
-					<label for="bannerName">{$t('customBanner.bannerName')}: *</label>
+					<label for="bannerName">
+						<span> {$t('customBanner.bannerName')}: * </span>
+						<ToolTip>{$t('customBanner.titleNote')}</ToolTip>
+					</label>
 					<div class="col">
 						<input
 							type="text"
 							autocomplete="off"
 							id="bannerName"
-							placeholder={$t('customBanner.bannerName')}
+							placeholder={$t('customBanner.titleOfBanner')}
 							value={bannerName}
 							on:input={typeBannerName}
 						/>
@@ -143,7 +152,7 @@
 							type="text"
 							autocomplete="off"
 							id="watermark"
-							placeholder="Banner By @Traveler"
+							placeholder="Artwork By @Traveler"
 							value={watermark}
 							on:input={typeWatermark}
 						/>
@@ -152,10 +161,13 @@
 
 				<div class="field-group">
 					<div class="row">
-						<label for="rateup">{$t('customBanner.rateupChar')}: *</label>
+						<label for="rateup">
+							<span> {$t('customBanner.rateupChar')}: * </span>
+							<ToolTip>{$t('customBanner.rateupNote')}</ToolTip>
+						</label>
 					</div>
 					<div class="row">
-						{#each Array(3) as _, i}
+						{#each rateUpList as _, i}
 							{@const { name, vision } = getCharDetails(rateup[i]) || {}}
 							<div class="rateup-item" class:blank={!name}>
 								{#if name}
@@ -170,7 +182,7 @@
 										{/key}
 									</button>
 								{:else}
-									<button class="add" on:click={openRateupPicker}>
+									<button class="add" on:click={() => openRateupPicker(i)}>
 										<i class="gi-plus" />
 									</button>
 								{/if}

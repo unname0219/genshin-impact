@@ -24,13 +24,12 @@
 	} from '$lib/store/app-stores';
 
 	import MyFund from '$lib/components/MyFund.svelte';
-	import EpitomizedButton from './epitomized-path/_button.svelte';
 	import BannerButton from './_banner-button.svelte';
 
 	export let bannerType = '';
 
-	$: event = bannerType.match('event');
-	$: balance = event ? $intertwined : $acquaint;
+	$: isEvent = bannerType.match(/(event|chronicled)/);
+	$: balance = isEvent ? $intertwined : $acquaint;
 	$: unlimitedWish = $wishAmount === 'unlimited';
 
 	const inTransition = (node, args) => {
@@ -51,9 +50,6 @@
 	const previousClick = () => {
 		navigate('allbanners');
 		playSfx();
-	};
-	const closeWindows = () => {
-		window.close();
 	};
 
 	const handleMenu = getContext('handleMenu');
@@ -102,9 +98,9 @@
 			<button class="help" on:click={handleMenu} title="Setting" aria-label="Setting">
 				<i class="gi-help" />
 			</button>
-			<!-- <button class="chat" on:click={chatToggle} title="Chats" aria-label="Chats">
+			<button class="chat" on:click={chatToggle} title="Chats" aria-label="Chats">
 				<i class="gi-chat" />
-			</button> -->
+			</button>
 
 			{#if !$isPWA || !$isMobile}
 				<button
@@ -132,15 +128,12 @@
 					<MyFund type="primogem" plusbutton>
 						{unlimitedWish ? '∞' : $primogem}
 					</MyFund>
-					<MyFund type={event ? 'intertwined' : 'acquaint'}>
+					<MyFund type={isEvent ? 'intertwined' : 'acquaint'}>
 						{unlimitedWish ? '∞' : balance}
 					</MyFund>
 				</div>
 
 				<button class="close" on:click={previousClick} title="Change Banner">
-					<i class="gi-close" />
-				</button>
-				<button class="close" on:click={closeWindows} title="close">
 					<i class="gi-close" />
 				</button>
 			{:else}
@@ -164,23 +157,24 @@
 				<img src={$assets['brand.png']} alt="Brand" crossorigin="anonymous" />
 			</div>
 
-			{#each $bannerList as { type, featured, character }, i}
-				<BannerButton
-					{type}
-					{featured}
-					{character}
-					index={i}
-					active={$activeBanner === i}
-					on:click={() => selectBanner(i)}
-				/>
-			{/each}
-
-			{#if $mobileMode && bannerType === 'weapon-event'}
-				<EpitomizedButton />
-			{/if}
+			<div class="button-wrapper" style={$bannerList.length > 5 ? 'flex-wrap: wrap' : ''}>
+				{#each $bannerList as { type, featured, character, region }, i}
+					<BannerButton
+						{type}
+						{character}
+						index={i}
+						featured={featured || region}
+						active={$activeBanner === i}
+						on:click={() => selectBanner(i)}
+					/>
+				{/each}
+			</div>
 		</div>
 	{:else}
-		<div class="banner-button" in:inTransition={{ mobile: $mobileMode }} />
+		<div class="banner-button" in:inTransition={{ mobile: $mobileMode }}>
+			<div class="bg" />
+			<div class="button-wrapper" />
+		</div>
 	{/if}
 </div>
 
@@ -258,7 +252,8 @@
 		align-items: center;
 	}
 
-	.banner-button {
+	.banner-button,
+	.button-wrapper {
 		text-align: center;
 		display: flex;
 		justify-content: center;
@@ -286,7 +281,7 @@
 		display: none;
 	}
 
-	:global(.mobile) .banner-button {
+	:global(.mobile) .button-wrapper {
 		flex-direction: column;
 		align-items: center;
 		width: 120px;
@@ -294,7 +289,6 @@
 		height: 100%;
 		justify-content: flex-start;
 		padding-top: 2.5rem;
-		z-index: -10;
 	}
 
 	:global(.mobile) .bg {
@@ -323,6 +317,11 @@
 			left: 50%;
 			transform: translateX(-50%);
 			margin-top: 0;
+		}
+	}
+	@media screen and (max-width: 975px) {
+		:global(main):not(.mobile) .button-wrapper {
+			flex-wrap: wrap;
 		}
 	}
 </style>

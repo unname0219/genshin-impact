@@ -38,11 +38,11 @@ export const getRate = (banner, key) => {
 
 	const initial = probabilityRates[banner];
 	const local = localrate.get(banner);
-	if (!(local[key] || local[key] >= 0)) return initial[key];
+	if (!(local[key] || local[key] >= 0)) return initial[key] || 0;
 
 	const val = parseFloat(local[key]);
-	if (isNaN(val)) return local[key];
-	return val;
+	if (isNaN(val)) return local[key] || 0;
+	return val || 0;
 };
 
 export const setRate = (banner, key, val) => {

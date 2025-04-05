@@ -19,6 +19,10 @@ export const itemList = () => {
 			pathList[`face/${keyNoExt}`] = src;
 		} else if (key.match(/splash-art/)) {
 			pathList[`splash-art/${keyNoExt}`] = src;
+		} else if (key.match(/wishcard/)) {
+			pathList[`wishcard/${keyNoExt}`] = src;
+		} else if (key.match(/art-nobg/)) {
+			pathList[`nobg/${keyNoExt}`] = src;
 		} else if (key.match(/banner-button/)) {
 			pathList[`button/${keyNoExt}`] = src;
 		} else if (key.match(/thumbnail/)) {
@@ -63,8 +67,10 @@ const images = [
 			'book-select-bg.webp',
 			'brand.png',
 			'button.webp',
-			'fatepointbook-half.webp',
-			'fatepointbook.webp',
+			'chronicled-mondstadt.webp',
+			'epitomized-bg.webp',
+			'epitomized-half.webp',
+			'epitomized-ribbon.webp',
 			'genesis-60.webp',
 			'genesis-300.webp',
 			'genesis-980.webp',
@@ -74,13 +80,13 @@ const images = [
 			'genesis-bg.webp',
 			'genesis.webp',
 			'history-select-bg.webp',
-			'imbroke.webp',
 			'intertwined-fate.webp',
 			'modal-bg-icon.png',
 			'payment-childe.webp',
 			'payment-tears.webp',
 			'payment-wakaranai.webp',
 			'primogem.webp',
+			'qiqi.webp',
 			'shop-nav-bg.webp',
 			'welkin-card.webp',
 			'welkin-moon-girl.webp',
@@ -102,7 +108,7 @@ const previewImages = [
 			'bg-claymore.webp',
 			'bg-polearm.webp',
 			'bg-sword.webp',
-			'face-placeholder.webp',
+			'placeholder-face.webp',
 			'genshin-logo-cn.webp',
 			'genshin-logo.webp',
 			'masterless-stardust.webp',

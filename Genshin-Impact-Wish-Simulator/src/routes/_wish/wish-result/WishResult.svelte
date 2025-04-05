@@ -22,14 +22,13 @@
 	export let skip = false;
 	export let standalone = false;
 	export let isOutfit = false;
-	export let bannerType = "";
 
 	let preview = standalone || false;
 	setContext('preview', (val) => (preview = val));
 
 	const lc = $locale?.toLowerCase() || '';
 	const isYuanshen = lc.match(/(cn|ja)/);
-	
+
 	const splashBG = isOutfit ? $assets['outfit-background.webp'] : $assets['splash-background.webp'];
 	list = list.map(setActiveOutfit);
 
@@ -60,7 +59,6 @@
 			const starBefore = list[activeIndex - 1].rarity;
 			stopSfx(`reveal${starBefore}Star`);
 		}
-
 		const star = list[activeIndex].rarity;
 		playSfx(`reveal${star}Star`);
 	};
@@ -132,7 +130,7 @@
 	out:fade={{ duration: 250 }}
 >
 	<!-- Preview Only -->
-	<!-- <div class="uid">WishSimulator.App</div> -->
+	<div class="uid">WishSimulator.App</div>
 	<img
 		src={$assets[`genshin-logo${isYuanshen ? '-cn' : ''}.webp`]}
 		alt="genshin logo"
@@ -154,7 +152,7 @@
 	{/if}
 
 	{#if showResultList && list.length > 1}
-		<ResultList {list} {standalone} {bannerType} />
+		<ResultList {list} {standalone} />
 	{:else}
 		<div class="touch-box" on:mousedown={showItem} />
 		<div
@@ -164,7 +162,7 @@
 			bind:clientWidth
 			in:fade={{ duration: 500, delay: 200 }}
 		>
-			{#each list as { name, rarity, type, outfitName, vision, weaponType, bonusQty, bonusType, stelaFortuna, useOutfit, offset, custom, chineseChar }, i}
+			{#each list as { name, rarity, type, outfitName, vision, weaponType, bonusQty, bonusType, stelaFortuna, useOutfit, offset, custom }, i}
 				{#if activeIndex === i}
 					<div class="art-wrapper">
 						{#if !isSplashOut} <SplashLight type="in" {rarity} /> {/if}
@@ -180,7 +178,6 @@
 								{useOutfit}
 								{clientHeight}
 								{clientWidth}
-								{chineseChar}
 							/>
 						</div>
 
@@ -194,7 +191,6 @@
 							{weaponType}
 							{stelaFortuna}
 							{custom}
-							{chineseChar}
 						/>
 						<WeaponBonus {type} {bonusQty} {bonusType} />
 						{#if isSplashOut} <SplashLight type="out" {rarity} /> {/if}

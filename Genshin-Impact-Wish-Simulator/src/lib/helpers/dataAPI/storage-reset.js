@@ -18,8 +18,7 @@ import {
 	editorMode,
 	customData,
 	isCustomBanner,
-	preloadVersion,
-	memberList
+	preloadVersion
 } from '$lib/store/app-stores';
 
 const { clearIDB } = HistoryManager;
@@ -82,6 +81,4 @@ export const factoryReset = async ({ clearCache = false, keepSetting = false } =
 	// Setting
 	autoskip.set(false);
 	wishAmount.set('default');
-
-	memberList.set({});
 };

@@ -12,6 +12,8 @@
 	import FrameCustom from './_frame-custom.svelte';
 	import BannerImage from './_banner-image.svelte';
 	import ProbEditor from './_probability-editor.svelte';
+	import ChronicledSpace from './_chronicled/bannerSpace.svelte';
+	import { isSafari } from '$lib/helpers/mobileDetect';
 
 	export let data = {};
 	export let index = -1;
@@ -26,9 +28,18 @@
 	let clientWidth;
 	let clientHeight;
 
+	let animate = !!editor;
 	let imageError = false;
 	setContext('imageError', () => (imageError = true));
 	const editProb = getContext('editprob');
+	const openRateEditor = () => {
+		animate = true;
+		editProb();
+	};
+	const closeRateEditor = () => {
+		if (editor) return;
+		animate = false;
+	};
 
 	const navigate = getContext('navigate');
 	const openDetails = () => {
@@ -41,16 +52,20 @@
 	class="card"
 	class:editor
 	class:fullscreenEditor
+	class:animate
+	class:safari={isSafari()}
 	bind:clientWidth
 	bind:clientHeight
 	style="--content-width:{clientWidth}px; --content-height:{clientHeight}px"
+	on:transitionend|self={closeRateEditor}
 >
-	<div class="back" on:mousedown|self={editProb}>
+	<div class="back" on:mousedown|self={openRateEditor}>
 		{#if editor}
-			<ProbEditor {type} {fullscreenEditor} />
+			<ProbEditor {fullscreenEditor} element={vision} />
 		{/if}
 	</div>
 	<div class="front">
+		<!-- Custom Banner -->
 		{#if $isCustomBanner}
 			<BannerImage
 				custom
@@ -59,10 +74,13 @@
 				wrapperClass="card-image skeleton"
 				{artPosition}
 				{vision}
+				{rateup}
 			/>
 			<div class="frame skeleton">
 				<FrameCustom {bannerName} {character} {charTitle} {vision} {watermark} />
 			</div>
+
+			<!-- Beginner Banner -->
 		{:else if type === 'beginner'}
 			<BannerImage
 				src={$assets['beginner']}
@@ -73,6 +91,8 @@
 			<div class="frame skeleton">
 				<FrameBeginner {character} />
 			</div>
+
+			<!-- Weapon Banner -->
 		{:else if type === 'weapon-event'}
 			<BannerImage
 				isError={imageError}
@@ -83,6 +103,8 @@
 			<div class="frame skeleton-event">
 				<FrameWeapon {featured} {rateup} {textOffset} />
 			</div>
+
+			<!-- Character Banner -->
 		{:else if type === 'character-event'}
 			<BannerImage
 				isError={imageError}
@@ -96,14 +118,20 @@
 						class="splash-art"
 						src={$assets[`splash-art/${character}`]}
 						alt="character"
-						on:error={(e) => e.target.remove()}
 						crossorigin="anonymous"
+						on:error={(e) => e.target.remove()}
 					/>
 				</div>
 			{/if}
 			<div class="frame skeleton-event">
 				<FrameCharacter {character} {textOffset} {bannerName} event2={index === 2} />
 			</div>
+
+			<!-- Chronicled Banner -->
+		{:else if type === 'chronicled'}
+			<ChronicledSpace />
+
+			<!-- Standard Banner -->
 		{:else if type === 'standard'}
 			<BannerImage
 				isError={imageError}
@@ -114,22 +142,12 @@
 			<div class="frame">
 				<FrameStandard {bannerName} />
 			</div>
-		{:else if type === 'member'}
-			<BannerImage
-				isError={imageError}
-				src={$assets[bannerName]}
-				alt="Member Banner"
-				wrapperClass="card-image {imageError ? 'skeleton' : ''}"
-			/>
-			<div class="frame">
-				<FrameCharacter {bannerName} {character} {textOffset} />
-			</div>
 		{/if}
 
 		<div class="info">
 			<button class="detail" on:click={openDetails}> {$t('details.text')} </button>
 			{#if type !== 'beginner'}
-				<button class="gear" on:click={editProb}><i class="gi-gear" /></button>
+				<button class="gear" on:click={openRateEditor}><i class="gi-gear" /></button>
 			{/if}
 		</div>
 	</div>
@@ -139,7 +157,7 @@
 	.card,
 	.front,
 	.back,
-	.frame {
+	.card :global(.frame) {
 		width: 100%;
 		height: fit-content;
 		aspect-ratio: 27/14;
@@ -148,7 +166,7 @@
 	.back {
 		position: absolute;
 		transform: rotateX(180deg);
-		z-index: +999;
+		z-index: +9;
 		transition: all 0.5s;
 	}
 
@@ -165,6 +183,7 @@
 		justify-content: center;
 		align-items: center;
 		backdrop-filter: blur(8px);
+		z-index: +15;
 	}
 
 	.front,
@@ -173,21 +192,25 @@
 		backface-visibility: hidden;
 	}
 
-	.frame.skeleton-event,
-	.card :global(.card-image.skeleton-event) {
-		aspect-ratio: 1080/533;
+	.editor .front {
+		transform: rotateX(0deg);
 	}
 
-	.frame.skeleton,
-	.card :global(.card-image.skeleton) {
+	.card :global(.skeleton-event) {
+		aspect-ratio: 1080/533;
+	}
+	.card :global(.skeleton) {
 		aspect-ratio: 738.55/382.95;
+	}
+	.card :global(h1 .block) {
+		display: block;
 	}
 
 	.card {
 		position: relative;
 	}
 
-	.card:not(.fullscreenEditor) {
+	.card.animate:not(.fullscreenEditor) {
 		transition: transform 0.5s;
 		transform-style: preserve-3d;
 	}
@@ -196,19 +219,28 @@
 		transform: rotateX(180deg);
 	}
 
+	.card.editor.safari:not(.fullscreenEditor) .front {
+		display: none;
+	}
+
 	.editor .front {
 		pointer-events: none;
 	}
 
-	.frame,
+	.card :global(.frame),
 	.card :global(.card-image) {
 		position: absolute;
 		bottom: 0;
 		left: 0;
 	}
+	.card:not(.fullscreenEditor) :global(.frame),
+	.card:not(.fullscreenEditor) :global(.card-image) {
+		z-index: +10;
+	}
 
 	.character {
 		position: absolute;
+		z-index: +10;
 		height: 100%;
 		right: 0;
 		top: 0;
@@ -222,18 +254,22 @@
 	.info {
 		position: absolute;
 		left: 5%;
-		bottom: 8%;
+		bottom: 4%;
 		display: flex;
 		align-items: center;
 		z-index: +10;
 	}
 
+	:global(.mobile) .info {
+		z-index: +10;
+	}
+
 	.info button {
 		background-color: #eee8e3;
-		color: rgba(0, 0, 0, 0.5);
-		border-radius: 20px;
-		border: #e2d7b6 0.1rem solid;
-		font-size: calc(1.5 / 100 * var(--content-width));
+		color: rgba(0, 0, 0, 0.65);
+		border-radius: 50px;
+		border: #e2d7b6 0.12rem solid;
+		font-size: calc(1.75 / 100 * var(--content-width));
 		transition: background 0.25s, color 0.25s;
 	}
 
@@ -243,8 +279,8 @@
 	}
 
 	.info button.gear {
-		width: calc(3 / 100 * var(--content-width));
-		font-size: calc(2 / 100 * var(--content-width));
+		width: calc(3.5 / 100 * var(--content-width));
+		font-size: calc(2.7 / 100 * var(--content-width));
 		aspect-ratio: 1/1;
 		display: inline-flex;
 		justify-content: center;

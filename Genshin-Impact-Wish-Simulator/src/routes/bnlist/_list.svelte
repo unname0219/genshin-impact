@@ -4,7 +4,7 @@
 	import { imageCDN } from '$lib/helpers/assets';
 	import { lazyLoad } from '$lib/helpers/lazyload';
 	import { timeAgo } from '$lib/helpers/timeago';
-	import { onlineBanner } from '$lib/helpers/custom-banner';
+	import { onlineBanner } from '$lib/helpers/banner-custom';
 	import ButtonGeneral from '$lib/components/ButtonGeneral.svelte';
 	import Pagination from '../_gachainfo/history/_pagination.svelte';
 
@@ -12,8 +12,8 @@
 	let itemPerPage = 10;
 	let customList = [];
 
-	const block = async (id) => {
-		await onlineBanner.block(id);
+	const block = async (id, db) => {
+		await onlineBanner.block(id, db);
 		const index = customList.findIndex(({ id: lID }) => id === lID);
 		customList[index].blocked = true;
 	};
@@ -35,10 +35,8 @@
 			const request = await fetch(API_HOST + '/storage');
 			const { success, data = [] } = await request.json();
 			if (!success) return;
-			// customList = data.sort(({ lastModified: a }, { lastModified: b }) => {
-			// 	return new Date(b) - new Date(a);
-			// });
-			customList = window._.orderBy(data, ['lastModified'], ['desc']);
+			const dataToShow = data.filter(({ bannerName }) => bannerName);
+			customList = window._.orderBy(dataToShow, ['lastModified'], ['desc']);
 		} catch (e) {
 			console.error(e);
 			customList = [];
@@ -72,7 +70,7 @@
 			<span> waiting ...</span>
 		</div>
 	{:else}
-		{#each getItemPage(customList, activepage) as { bannerName, hostedImages = { }, blocked, id, lastModified }}
+		{#each getItemPage(customList, activepage) as { bannerName, hostedImages = { }, blocked, id, db, lastModified }}
 			<div class="row" {id}>
 				<div class="col img">
 					{#each ['artURL', 'faceURL', 'thumbnail'] as key}
@@ -95,7 +93,7 @@
 					{#if blocked}
 						<ButtonGeneral disabled>Blocked</ButtonGeneral>
 					{:else}
-						<ButtonGeneral on:click={() => block(id)}>Block</ButtonGeneral>
+						<ButtonGeneral on:click={() => block(id, db)}>Block</ButtonGeneral>
 					{/if}
 				</div>
 			</div>

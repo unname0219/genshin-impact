@@ -10,7 +10,7 @@
 	import SplashartForm from './BannerEditor/_splashart-form.svelte';
 	import MainArt from './BannerEditor/BannerArt.svelte';
 	import VisionPicker from './BannerEditor/_vision-picker.svelte';
-	import InfoEditor from './BannerEditor/_info-editor.svelte';
+	import DetailsEditor from './BannerEditor/_details-editor.svelte';
 	import SplashArtEditor from './SplashArtEditor/SplashArt.svelte';
 
 	let clientHeight;
@@ -155,15 +155,15 @@
 	style="--content-width:{clientWidth}px; --content-height:{clientHeight}px"
 >
 	<img
-		src={$assets[`blank/${vision}`]}
+		src={$assets[`blank/character-${vision}`]}
 		alt="Background Banner"
 		crossorigin="anonymous"
 		class="art-bg"
 	/>
 
 	<VisionPicker selected={vision} />
-	{#key artPosition}
-		<MainArt {onBannerEdit} artURL={images?.artURL} bannerPosition={artPosition?.banner} />
+	{#key artPosition && rateup}
+		<MainArt {onBannerEdit} {rateup} artURL={images?.artURL} bannerPosition={artPosition?.banner} />
 	{/key}
 	<SplashartForm {onBannerEdit} />
 	<FrameCustom
@@ -179,7 +179,7 @@
 </div>
 
 {#if isInfoEdit}
-	<InfoEditor
+	<DetailsEditor
 		preview={images?.thumbnail}
 		{rateup}
 		{bannerName}
@@ -210,12 +210,15 @@
 		height: fit-content;
 		aspect-ratio: 1080/533;
 	}
+	.card :global(h1 .block) {
+		display: block;
+	}
 
 	img {
 		width: 100%;
 		height: 100%;
 		display: block;
-		object-fit: contain;
+		object-fit: fill;
 		object-position: center;
 	}
 

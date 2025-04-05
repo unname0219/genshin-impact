@@ -1,11 +1,10 @@
 <script>
-	import { onMount } from 'svelte';
 	import { fly } from 'svelte/transition';
 	import { locale, t } from 'svelte-i18n';
-	import OverlayScrollbars from 'overlayscrollbars';
 	import { positionToStyle } from '$lib/helpers/cssPosition';
 	import { getBannerName, highlightBannerName } from '$lib/helpers/nameText';
 	import { getCharDetails } from '$lib/helpers/gacha/itemdrop-base';
+	import Dropnotes from './__dropnotes.svelte';
 
 	export let bannerName = '';
 	export let character = '';
@@ -15,15 +14,6 @@
 	$: localeBannerName = $t(`banner.${getBannerName(bannerName).name}`);
 	$: vision = getCharDetails(character).vision;
 	$: featuredC = `--text-width: calc(${textOffset?.w || 30} / 100 * var(--content-width));`;
-
-	let bannerInfo;
-	onMount(() => {
-		OverlayScrollbars(bannerInfo, {
-			sizeAutoCapable: false,
-			className: 'os-theme-light',
-			scrollbars: { visibility: 'hidden' }
-		});
-	});
 </script>
 
 <div class="frame-content">
@@ -31,28 +21,14 @@
 		{$t('wish.banner.character-event')}
 		{event2 ? ($locale === 'ja-JP' ? '2' : '— 2') : ''}
 	</div>
-	<h1 class="card-stroke" in:fly={{ x: 15, duration: 700 }}>
-		{@html highlightBannerName(localeBannerName, vision)}
-	</h1>
+	<div class="heading" in:fly={{ x: 15, duration: 700 }}>
+		<h1 class="card-stroke">
+			{@html highlightBannerName(localeBannerName, vision)}
+		</h1>
+	</div>
 
-	<div class="info" bind:this={bannerInfo}>
-		<div class="content" in:fly={{ x: 15, duration: 700 }}>
-			<div class="set card-stroke">
-				{$t('wish.banner.probIncreased')}
-			</div>
-			<div class="desc bg-{vision}" style="opacity: 90%;">
-				<div class="icon">
-					<i class="gi-primo-star" />
-				</div>
-				<div class="text">
-					{$t('wish.banner.wishDescription')}
-				</div>
-			</div>
-			<div class="note card-stroke">
-				{$t('wish.banner.eventNote')}
-				{$t('wish.banner.viewDetails')}
-			</div>
-		</div>
+	<div class="description" in:fly={{ x: 15, duration: 700 }}>
+		<Dropnotes element={vision} banner="character-event" />
 	</div>
 
 	<div
@@ -83,31 +59,34 @@
 		line-height: 130%;
 	}
 
-	h1 :global(span) {
-		display: block;
-	}
-
-	h1,
 	.frame-content > div {
 		text-align: left;
 		position: absolute;
 	}
-	h1 {
+
+	.heading {
+		position: absolute;
+		display: flex;
+		align-items: center;
 		bottom: 67%;
 		left: 0;
 		margin: 0 4%;
-		line-height: 125%;
+		height: calc(0.23 * var(--content-height));
+		width: 45%;
+	}
+
+	h1 {
+		text-align: left;
+		line-height: 100%;
 		font-size: calc(4.5 / 100 * var(--content-width));
 	}
 
-	:global(.zh-CN) h1 {
-		font-size: calc(7 / 100 * var(--content-width));
-	}
-
+	:global(.zh-CN) h1,
 	:global(.ja-JP) h1 {
-		max-width: 45%;
 		font-size: calc(6 / 100 * var(--content-width));
-		line-height: 100%;
+	}
+	:global(.ja-JP) h1 {
+		max-width: 80%;
 	}
 
 	.top {
@@ -121,53 +100,17 @@
 		transform: translate(-3%, -15%);
 	}
 
-	.info {
+	.description {
 		left: 0;
-		top: 40%;
-		width: 40%;
+		top: 37.5%;
+		width: 45%;
 		height: 42%;
 		display: block;
 		padding-left: 4%;
+		overflow: auto;
 	}
-
-	.content {
-		position: relative;
-	}
-
-	.info .content::after {
-		content: '';
-		display: block;
-		width: calc(0.55 / 100 * var(--content-width));
-		height: 100%;
-		background-color: #565654;
-		position: absolute;
-		left: calc(-3.045 / 100 * var(--content-width));
-		top: 0;
-	}
-
-	.set {
-		font-size: calc(2.4 / 100 * var(--content-width));
-	}
-
-	.desc {
-		color: #fff;
-		min-height: calc(9 / 100 * var(--content-height));
-		display: flex;
-		align-items: center;
-		margin: calc(0.7 / 100 * var(--content-width)) 0;
-	}
-
-	.icon {
-		display: flex;
-		justify-content: center;
-		align-items: center;
-		padding: calc(1 / 100 * var(--content-width));
-		font-size: calc(1.1 / 100 * var(--content-width));
-	}
-
-	.desc .text {
-		width: calc(32.5 / 100 * var(--content-width));
-		padding: calc(0.3 / 100 * var(--content-width));
+	.description::-webkit-scrollbar {
+		display: none;
 	}
 
 	.character {

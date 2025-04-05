@@ -22,7 +22,7 @@
 	import { mountLocale } from '$lib/helpers/i18n';
 	import { mobileDetect } from '$lib/helpers/mobileDetect';
 	import { wakeLock } from '$lib/helpers/wakeLock';
-	import { syncCustomBanner } from '$lib/helpers/custom-banner';
+	import { syncCustomBanner } from '$lib/helpers/banner-custom';
 	// import { initializeDriveAPI } from '$lib/helpers/dataAPI/google-api';
 	import '../app.css';
 
@@ -120,14 +120,6 @@
 
 	<link
 		rel="preload"
-		href="/fonts/aaqishu.woff"
-		as="font"
-		type="font/woff"
-		crossorigin
-	/>
-
-	<link
-		rel="preload"
 		href="/fonts/optimized_global_web.woff2"
 		as="font"
 		type="font/woff2"
@@ -159,7 +151,7 @@
 		<link rel="manifest" href="/appmanifest.json" />
 	{/if}
 
-	<!-- <Iklan head /> -->
+	<Iklan head />
 </svelte:head>
 
 <Loader {isBannerLoaded} {directLoad} />
@@ -184,7 +176,7 @@
 		class="uid"
 		title="Try Your Luck by this Simulator"
 	>
-		<!-- WishSimulator.App -->
+		WishSimulator.App
 	</a>
 </main>
 
@@ -217,14 +209,6 @@
 		src: url('/fonts/optimized_zh_web.woff2') format('woff2');
 		font-weight: normal;
 		font-style: normal;
-	}
-
-	
-	@font-face {
-		font-family: 'AAQISHU';
-		src: url('/fonts/aaqishu.woff') format('woff');
-		font-style: normal;
-		font-weight: normal;
 	}
 
 	:global(.os-theme-light > .os-scrollbar > .os-scrollbar-track > .os-scrollbar-handle) {

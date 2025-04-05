@@ -12,8 +12,10 @@
 	} from '$lib/store/app-stores';
 	import { playSfx } from '$lib/helpers/audio/audio';
 	import { BannerManager } from '$lib/helpers/dataAPI/api-indexeddb';
+	import { maintenance } from '$lib/helpers/banner-custom';
 	import { highlightBannerName } from '$lib/helpers/nameText';
 	import SvgIcon from '$lib/components/SVGIcon.svelte';
+	import Dropnotes from './__dropnotes.svelte';
 
 	export let bannerName = '';
 	export let character = '';
@@ -51,11 +53,11 @@
 	<div class="top bg-{vision}">
 		{$t('wish.banner.character-event')}
 	</div>
-	<h1 class="card-stroke" in:fly={{ x: 15, duration: 700 }}>
-		<div class="wrap">
-			{@html highlightBannerName(bannerName || $t('customBanner.bannerName'), vision)}
-		</div>
-	</h1>
+	<div class="heading" in:fly={{ x: 15, duration: 700 }}>
+		<h1 class="card-stroke">
+			{@html highlightBannerName(bannerName || $t('customBanner.titleOfBanner'), vision)}
+		</h1>
+	</div>
 
 	{#if $isCustomBanner}
 		<div class="action">
@@ -65,31 +67,17 @@
 				</button>
 			{/if}
 
-			<button class="delete" on:click={deleteBanner}>
-				<i class="gi-delete" />
-				{$t('customBanner.delete')}
-			</button>
+			{#if !maintenance}
+				<button class="delete" on:click={deleteBanner}>
+					<i class="gi-delete" />
+					{$t('customBanner.delete')}
+				</button>
+			{/if}
 		</div>
 	{/if}
 
 	<div class="info" bind:this={infoContainer}>
-		<div class="content">
-			<div class="set card-stroke">
-				{$t('wish.banner.probIncreased')}
-			</div>
-			<div class="desc bg-{vision}" style="opacity: 90%;">
-				<div class="icon">
-					<i class="gi-primo-star" />
-				</div>
-				<div class="text">
-					{$t('wish.banner.wishDescription')}
-				</div>
-			</div>
-			<div class="note card-stroke">
-				{$t('wish.banner.eventNote')}
-				{$t('wish.banner.viewDetails')}
-			</div>
-		</div>
+		<Dropnotes element={vision} banner="character-event" />
 	</div>
 
 	<div class="character">
@@ -111,9 +99,11 @@
 			</div>
 		</div>
 
-		<div class="char-title">
-			{charTitle || $t('customBanner.charTitle')}
-		</div>
+		{#if charTitle}
+			<div class="char-title">
+				{charTitle || $t('customBanner.charTitle')}
+			</div>
+		{/if}
 	</div>
 
 	<div class="watermark">{watermark || ''}</div>
@@ -137,34 +127,34 @@
 		opacity: 0.5;
 	}
 
-	h1 :global(span) {
-		display: block;
-	}
-
-	h1,
 	.frame-content > div {
 		text-align: left;
 		position: absolute;
 	}
-	h1 {
+
+	.heading {
+		position: absolute;
+		display: flex;
+		align-items: center;
 		bottom: 67%;
 		left: 0;
 		margin: 0 4%;
-		line-height: 125%;
-		font-size: calc(4.5 / 100 * var(--content-width));
 		height: calc(0.23 * var(--content-height));
-		display: flex;
-		align-items: center;
+		width: 45%;
+	}
+
+	h1 {
+		text-align: left;
+		line-height: 100%;
+		font-size: calc(4.5 / 100 * var(--content-width));
 	}
 
 	:global(.zh-CN) h1 {
 		font-size: calc(7 / 100 * var(--content-width));
 	}
-
 	:global(.ja-JP) h1 {
-		max-width: 45%;
+		max-width: 80%;
 		font-size: calc(6 / 100 * var(--content-width));
-		line-height: 100%;
 	}
 
 	.editorMode h1 {
@@ -243,51 +233,11 @@
 		top: 32.5%;
 	}
 
-	.content {
-		position: relative;
-	}
-
-	.info .content::after {
-		content: '';
-		display: block;
-		width: calc(0.55 / 100 * var(--content-width));
-		height: 100%;
-		background-color: #565654;
-		position: absolute;
-		left: calc(-3.045 / 100 * var(--content-width));
-		top: 0;
-	}
-
-	.set {
-		font-size: calc(2.4 / 100 * var(--content-width));
-	}
-
-	.desc {
-		color: #fff;
-		min-height: calc(9 / 100 * var(--content-height));
-		display: flex;
-		align-items: center;
-		margin: calc(0.7 / 100 * var(--content-width)) 0;
-	}
-
-	.icon {
-		display: flex;
-		justify-content: center;
-		align-items: center;
-		padding: calc(1 / 100 * var(--content-width));
-		font-size: calc(1.1 / 100 * var(--content-width));
-	}
-
-	.desc .text {
-		width: calc(32.5 / 100 * var(--content-width));
-		padding: calc(0.3 / 100 * var(--content-width));
-	}
-
 	.character {
 		--text-width: calc(30 / 100 * var(--content-width));
 		width: calc(30 / 100 * var(--content-width));
-		left: 50%;
-		bottom: 8%;
+		left: 48.5%;
+		bottom: 10%;
 	}
 
 	.character .char-name {
@@ -372,8 +322,10 @@
 		right: 2%;
 		bottom: 2%;
 		font-style: italic;
+		font-weight: bold;
 		color: #fff;
-		font-size: calc(3 / 100 * var(--content-height));
+		font-size: calc(0.035 * var(--content-height));
 		font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+		text-shadow: 0 0 calc(0.05 * var(--content-height)) #000;
 	}
 </style>

@@ -2,14 +2,21 @@
 	import { getContext } from 'svelte';
 	import { fade, fly } from 'svelte/transition';
 	import { t } from 'svelte-i18n';
+	import { activeBanner, bannerList, chronicledCourse } from '$lib/store/app-stores';
 	import { localPity } from '$lib/helpers/dataAPI/api-localstore';
 	import { getRate, setRate } from '$lib/helpers/gacha/probabilities';
 	import { playSfx } from '$lib/helpers/audio/audio';
+	import { regionElement } from '$lib/helpers/gacha/itemdrop-base';
 	import ButtonGeneral from '$lib/components/ButtonGeneral.svelte';
 	import ButtonModal from '$lib/components/ButtonModal.svelte';
 
-	export let type = 'character-event';
+	export let element = 'default';
 	export let fullscreenEditor = false;
+
+	const { type: banner, region } = $bannerList[$activeBanner];
+	const type = banner || 'character-event';
+	const isChronicled = type === 'chronicled';
+	element = isChronicled ? regionElement(region) : element;
 
 	const editprob = getContext('editprob');
 	const showModalReset = getContext('showModalReset');
@@ -106,9 +113,13 @@
 </script>
 
 <div class="editor {type}" class:fullscreenEditor out:fade|local>
-	<div class="header">
+	<i class="logo gi-{region || element}" />
+
+	<h1 class="header bg-{element}">
 		{$t('editor.bannerConfig', { values: { banner: $t(`wish.banner.${type}`) } })}
-	</div>
+		<i class="gi-{region}" />
+	</h1>
+
 	<div class="body">
 		<div class="item">
 			<div class="col">
@@ -214,7 +225,7 @@
 			</div>
 		</div>
 
-		{#if type !== 'standard'}
+		{#if !type.match(/standard|chronicled/)}
 			<div class="item" class:disabled={guaranteed === 'always'}>
 				<div class="col">{$t('editor.winRate')}</div>
 				<div class="col percent">
@@ -223,6 +234,25 @@
 						value={winRate}
 						disabled={guaranteed === 'always'}
 						on:input={(e) => changeRate(e, 'winRate')}
+					/>
+				</div>
+			</div>
+		{/if}
+
+		{#if type.match('weapon') || type === 'chronicled'}
+			<div class="item">
+				<div class="col">
+					{$t('editor.selectedRate', {
+						values: {
+							itemType: type === 'chronicled' ? $t($chronicledCourse?.type || 'item') : $t('weapon')
+						}
+					})}
+				</div>
+				<div class="col percent">
+					<input
+						type="number"
+						value={selectedRate}
+						on:input={(e) => changeRate(e, 'selectedRate')}
 					/>
 				</div>
 			</div>
@@ -239,7 +269,7 @@
 		>
 			<div class="col">
 				{$t('editor.charRate')}
-				{#if type !== 'standard'}
+				{#if !type.match(/standard/)}
 					<small>{$t('editor.nonRateup')}</small>
 				{/if}
 				:
@@ -254,20 +284,7 @@
 			</div>
 		</div>
 
-		{#if type.match('weapon')}
-			<div class="item">
-				<div class="col">{$t('editor.selectedRate')}</div>
-				<div class="col percent">
-					<input
-						type="number"
-						value={selectedRate}
-						on:input={(e) => changeRate(e, 'selectedRate')}
-					/>
-				</div>
-			</div>
-		{/if}
-
-		{#if type !== 'standard'}
+		{#if !type.match(/standard|chronicled/)}
 			<div class="item">
 				<div class="col">{@html $t('editor.guaranteedSystem')}</div>
 				<div class="col select">
@@ -297,6 +314,8 @@
 			</div>
 		{/if}
 	</div>
+
+	<!-- Button Confirm -->
 	<div class="footer">
 		<ButtonGeneral on:click={resetClick}>{$t('editor.backToDefault')}</ButtonGeneral>
 		<ButtonModal
@@ -326,14 +345,19 @@
 	}
 
 	.header {
-		background-color: rgba(20, 18, 15, 0.85);
 		color: #fff;
 		padding: 1rem;
+		font-size: inherit;
+		text-align: left;
+		position: relative;
+		overflow: hidden;
+	}
+	.bg-default.header {
+		background-color: rgba(20, 18, 15, 0.85);
 	}
 	.fullscreenEditor .header {
 		padding: 0.75rem 1rem;
 	}
-
 	.standard .header {
 		background-color: #5b61c4;
 	}
@@ -341,13 +365,31 @@
 		background-color: #c86612;
 	}
 
+	.header i {
+		position: absolute;
+		top: -10%;
+		right: 0;
+		font-size: calc(0.1 * var(--content-width));
+		line-height: 0;
+		opacity: 0.5;
+	}
+
 	.body {
 		padding: 0 1% 1%;
 		width: 100%;
+		position: relative;
 	}
 	.fullscreenEditor .body {
 		height: 100%;
 		overflow-y: auto;
+	}
+	i.logo {
+		position: absolute;
+		bottom: 1%;
+		left: 1%;
+		font-size: calc(0.2 * var(--content-width));
+		line-height: 0;
+		opacity: 0.04;
 	}
 
 	.footer {

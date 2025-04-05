@@ -1,9 +1,11 @@
 <script>
 	import { getContext, onMount } from 'svelte';
 	import Zoomist from 'zoomist';
+	import RateUpArt from './RateUpArt.svelte';
 
 	export let onBannerEdit = false;
 	export let artURL = '';
+	export let rateup = [];
 	export let bannerPosition = { scale: 2, x: 0, y: 0 };
 
 	let mainArt;
@@ -81,6 +83,8 @@
 	});
 </script>
 
+<RateUpArt {rateup} {onBannerEdit} />
+
 <div class="main-art" class:onBannerEdit bind:clientHeight bind:clientWidth>
 	<div class="zoom-slider" />
 	<div class="zoomer">
@@ -92,7 +96,7 @@
 	<div class="zoomist-container" bind:this={mainArt}>
 		<div class="zoomist-wrapper">
 			<div class="zoomist-image">
-				<img src={artURL} alt="Uploaded Splash Art" crossorigin="anonymous" />
+				<img src={artURL} alt="Uploaded Splash Art" />
 			</div>
 		</div>
 	</div>
@@ -130,7 +134,7 @@
 	.zoomist-wrapper {
 		cursor: move;
 		background-color: unset;
-		mask-image: linear-gradient(to right, transparent 15%, black 40%, black 75%, transparent 85%);
+		mask-image: linear-gradient(to right, transparent 15%, black 40%, black 70%, transparent 85%);
 	}
 
 	.zoom-slider {

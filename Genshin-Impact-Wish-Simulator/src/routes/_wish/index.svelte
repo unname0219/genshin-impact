@@ -36,7 +36,7 @@
 	$: nowBanner = $bannerList[$activeBanner] || {};
 	$: ({ type } = nowBanner);
 	$: bannerType = type || '';
-	$: isEvent = bannerType.match('event');
+	$: isEvent = bannerType.match(/(event|chronicled)/);
 	$: currencyUsed = isEvent ? $intertwined : $acquaint;
 	$: isUnlimited = $wishAmount === 'unlimited';
 
@@ -65,7 +65,6 @@
 	let onWish = getContext('onWish');
 
 	const doRoll = async (count, bannerToRoll) => {
-
 		rollCount = count;
 		multi = count > 1;
 		const tmp = [];
@@ -89,7 +88,7 @@
 	setContext('doRoll', doRoll);
 
 	const updateFatesBalance = (banner) => {
-		const isAcquaint = ['beginner', 'standard', 'member'].includes(banner);
+		const isAcquaint = ['beginner', 'standard'].includes(banner);
 		const funds = isAcquaint ? acquaint : intertwined;
 		funds.update((n) => {
 			const afterUpdate = n - (banner === 'beginner' && rollCount > 1 ? 8 : rollCount);
@@ -121,6 +120,7 @@
 	let showWishResult = false;
 	let showMeteor = false;
 	let single = true;
+	let radiance = false;
 	let meteorStar = 3;
 
 	const closeResult = () => {
@@ -146,6 +146,8 @@
 		meteorStar = 3;
 		if (stars.includes(4)) meteorStar = 4;
 		if (stars.includes(5)) meteorStar = 5;
+		const captureStatus = result.map(({ captured = false }) => captured);
+		radiance = captureStatus.includes(true);
 		showMeteor = true;
 	};
 
@@ -193,9 +195,9 @@
 <div class="overlay" in:fade|local />
 
 <div class="wish-container" class:show={showMeteor || showWishResult}>
-	<Meteor show={showMeteor} isSingle={single} rarity={meteorStar} />
+	<Meteor show={showMeteor} isSingle={single} rarity={meteorStar} {radiance} />
 	{#if showWishResult}
-		<WishResult list={result} skip={skipSplashArt} bannerType={bannerType} />
+		<WishResult list={result} skip={skipSplashArt} />
 	{/if}
 </div>
 

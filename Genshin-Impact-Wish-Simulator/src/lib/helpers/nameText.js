@@ -12,7 +12,7 @@ const getName = (name) => {
 		.join(' ');
 };
 
-const getSlug = (name) => name.replace(/ /g, '-').replace(new RegExp("'"), '_');
+const getSlug = (name) => name.replace(/ /g, '-').replace(new RegExp(/'/g), '_');
 
 const copy = (text) => {
 	if (navigator.clipboard) {
@@ -46,21 +46,21 @@ export const randomLetter = (length) => {
 const highLightMethod2 = (name, vision) => {
 	const splited = name.replaceAll(/(#)/gi, '').trim().split(' ');
 	const wordCount = splited.length - 1;
-	if (wordCount < 1) return `<span class="${vision}-flat" block>${name}</span>`;
+	if (wordCount < 1) return `<span class="${vision}-flat block">${name}</span>`;
 
 	const modulo = wordCount % 2;
 	const halfOfTextIndex = (wordCount - modulo) / 2;
 	const frontText = splited.filter((w, i) => i <= halfOfTextIndex).join(' ');
 	const endText = splited.filter((w, i) => i > halfOfTextIndex).join(' ');
 
-	return `<span class="${vision}-flat" block>${frontText}</span> ${endText}`;
+	return `<span class="${vision}-flat block">${frontText}</span> ${endText}`;
 };
 
 export const highlightBannerName = (name, vision) => {
 	const method1 = name.trim().split('#');
 	if (method1.length !== 3) return highLightMethod2(name, vision);
 	const [front, colored, back] = method1;
-	return `${front}<span class="${vision}-flat" style="display: inline">${colored}</span>${back}`;
+	return `${front}<span class="${vision}-flat">${colored}</span>${back}`;
 };
 
 export { getName, getSlug, copy, getBannerName };

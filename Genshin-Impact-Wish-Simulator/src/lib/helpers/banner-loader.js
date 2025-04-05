@@ -1,6 +1,5 @@
 import { beginner } from '$lib/data/banners/beginner.json';
 import { standard } from '$lib/data/banners/standard.json';
-import { member } from '$lib/data/banners/member.json';
 import { version, wishPhase } from '$lib/data/wish-setup.json';
 
 import { imageCDN } from './assets';
@@ -67,9 +66,8 @@ const useCustomBanner = async (bannerID) => {
 };
 
 const checkBeginnerBanner = () => {
-	// const starterRollCount = rollCounter.get('beginner');
-	// const isShowBeginner = starterRollCount < 20;
-	const isShowBeginner = false;
+	const starterRollCount = rollCounter.get('beginner');
+	const isShowBeginner = starterRollCount < 20;
 	showBeginner.set(isShowBeginner);
 	return isShowBeginner;
 };
@@ -83,19 +81,17 @@ export const initializeBanner = async ({ patch, phase }) => {
 
 		const { data } = await import(`$lib/data/banners/events/${patch}.json`);
 		const { banners } = data.find((b) => b.phase === phase);
-		const { events, weapons, standardVersion: stdver } = banners;
+		const { events, weapons, standardVersion: stdver, chronicled = null } = banners;
 		const { featured: stdFeatured } = standard.find(({ version }) => stdver === version) || {};
-		const { featured: memFeatured } = member.find(({ version }) => stdver === version) || {};
+
 		const charEventBanner = {
 			type: 'character-event',
 			rateup: events.rateup,
 			stdver
 		};
-
-		list.push({ type: 'member', stdver, ...memFeatured});
-
 		events.featured.forEach((eventdata) => list.push({ ...eventdata, ...charEventBanner }));
 		list.push({ type: 'weapon-event', stdver, ...weapons });
+		if (chronicled) list.push({ type: 'chronicled', stdver, ...chronicled });
 		list.push({ type: 'standard', stdver, ...stdFeatured });
 
 		bannerList.set(list);

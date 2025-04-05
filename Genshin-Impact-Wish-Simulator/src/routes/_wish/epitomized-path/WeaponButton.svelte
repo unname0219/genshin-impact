@@ -1,11 +1,10 @@
 <script>
-	import { getContext, onMount } from 'svelte';
+	import { getContext } from 'svelte';
 	import { fade } from 'svelte/transition';
 	import { t } from 'svelte-i18n';
 	import hotkeys from 'hotkeys-js';
 
 	import { activeBanner, activeVersion, bannerList, course } from '$lib/store/app-stores';
-	import { fatepointManager } from '$lib/helpers/dataAPI/api-localstore';
 	import { playSfx } from '$lib/helpers/audio/audio';
 	import { noticeMark } from '$lib/helpers/noticeMark';
 
@@ -15,13 +14,8 @@
 	let buttonHeight;
 	let patch, phase, type, fatepointsystem;
 	$: ({ patch, phase } = $activeVersion);
+	$: steps = patch >= 5.0 ? 1 : 2;
 	$: ({ fatepointsystem, type } = $bannerList[$activeBanner]);
-
-	const checkFatepoint = () => {
-		const localFate = fatepointManager.init({ phase, version: patch });
-		const { selected, point } = localFate.getInfo();
-		course.set({ point, selected });
-	};
 
 	const handleEpitomizedModal = getContext('handleEpitomizedModal');
 	const handleClick = () => {
@@ -29,8 +23,6 @@
 		handleEpitomizedModal();
 		noticeMark.openNotice(`fatepoint${patch}-${phase}`);
 	};
-
-	onMount(() => bannerList.subscribe(checkFatepoint));
 
 	// Shortcut
 	hotkeys('e', 'index', (e) => {
@@ -49,10 +41,10 @@
 		bind:clientHeight={buttonHeight}
 	>
 		<NoticeMark name="fatepoint{patch}-{phase}" />
-		<EpitomizedIcon active={$course.point === 2} />
+		<EpitomizedIcon point={$course.point} {steps} />
 		<div class="point-number">
 			{#if $course.selected !== null}
-				<span>{$course.point}</span>/2
+				<span>{$course.point}</span>/{steps}
 			{:else}
 				<span class="small">{$t('epitomizedPath.heading')}</span>
 			{/if}

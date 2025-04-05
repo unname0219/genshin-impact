@@ -101,7 +101,7 @@
 	};
 
 	const generateQueryKey = (ver, phase, banners) => {
-		const { events, weapons } = banners;
+		const { events, weapons, chronicled: ch } = banners;
 		const { rateup, bannerName, featured } = weapons;
 
 		const translatedRateupWp = rateup.map((wp) => $t(wp));
@@ -119,12 +119,14 @@
 
 		const result = {
 			queryKey,
+			phase,
+			patch: ver,
 			rateup: [...events.rateup, ...weapons.rateup],
 			weapons: { bannerName: weapons.bannerName, list: weapons.featured },
-			chars: events.featured,
-			patch: ver,
-			phase
+			chars: events.featured
 		};
+
+		if (ch) result.chronicled = { bannerName: ch?.bannerName };
 		return result;
 	};
 
@@ -151,12 +153,13 @@
 	const handleSearch = (e) => {
 		groupby = 'version';
 		const queryValue = typeof e === 'string' ? e : e.target.value;
-		const query = queryValue.toLocaleLowerCase().trim().replace(/'/, '');
-		if (query.length < 1) return (dataToShow = allBanners);
+		query.set(queryValue);
+		const escapedQuery = queryValue.toLocaleLowerCase().trim().replace(/'/, '');
+		if (escapedQuery.length < 1) return (dataToShow = allBanners);
 
 		const check = (t) => {
 			const text = t.toLocaleLowerCase();
-			return text.replace(/_/g, '').replace(/-/g, ' ').includes(query);
+			return text.replace(/_/g, '').replace(/-/g, ' ').includes(escapedQuery);
 		};
 
 		const newArr = allBanners.map(([a, b]) => {
@@ -181,6 +184,7 @@
 		});
 		customBanner = ['Custom', proccessed];
 	};
+
 	const loadData = async () => {
 		await checkAllBanner();
 		await readSavedCustomBanner();
@@ -225,7 +229,8 @@
 		<div class="content" bind:this={content}>
 			<div id="content">
 				{#await loadData() then _}
-					{@const bn = customBanner[1].length < 1 ? dataToShow : [customBanner, ...dataToShow]}
+					{@const showCustom = customBanner[1].length > 0 && !$query}
+					{@const bn = showCustom ? [customBanner, ...dataToShow] : dataToShow}
 
 					{#if $isMobile}
 						{#each bn as [groupName, data]}

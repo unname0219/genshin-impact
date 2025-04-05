@@ -6,6 +6,7 @@
 	import { playSfx } from '$lib/helpers/audio/audio';
 	import { activeVersion, assets, preloadVersion } from '$lib/store/app-stores';
 	import { imageCDN } from '$lib/helpers/assets';
+	import { lazyLoad } from '$lib/helpers/lazyload';
 
 	export let groupby = 'version';
 	export let groupName;
@@ -28,7 +29,7 @@
 
 <div class="group-title">
 	{#if isCustom}
-		<h2>Created by Travelers <i class="gi-primo-star" /></h2>
+		<h2>{$t('customBanner.byTraveler')} <i class="gi-primo-star" /></h2>
 	{:else}
 		<h2>
 			{#if groupby === 'version'}
@@ -43,7 +44,7 @@
 	{/if}
 </div>
 
-{#each data as { patch, phase, chars, weapons }, i (i)}
+{#each data as { patch, phase, chars, weapons, chronicled }, i (i)}
 	<a
 		href="/"
 		class="item"
@@ -56,13 +57,18 @@
 			<div class:dual={chars?.length > 1}>
 				{#each chars as { character, bannerName, images }, i}
 					{#if isCustom}
-						<img src={imageCDN(images)} alt={character} crossorigin="anonymous" loading="lazy" />
+						<img
+							use:lazyLoad={imageCDN(images)}
+							data-placeholder={$assets['placeholder-general.webp']}
+							alt={character}
+							loading="lazy"
+						/>
 					{:else}
 						{#key bannerName}
 							<img
 								src={$assets[`thumbnail/${bannerName}`]}
 								alt={getName(character)}
-								class="dual{i + 1}"
+								class="dual{i + 1} "
 								crossorigin="anonymous"
 								loading="lazy"
 							/>
@@ -72,13 +78,25 @@
 			</div>
 
 			{#if !isCustom}
-				<div class="weapon">
+				{@const { bannerName: chName = null } = chronicled || {}}
+				<div class:dual={!!chName}>
 					<img
 						src={$assets[`thumbnail/${weapons.bannerName}`]}
 						alt={getName(weapons.bannerName)}
+						class="dual1"
 						crossorigin="anonymous"
 						loading="lazy"
 					/>
+
+					{#if chName}
+						<img
+							src={$assets[`thumbnail/${chName}`]}
+							alt={$t('wish.banner.chronicled')}
+							class="dual2 chronicled"
+							crossorigin="anonymous"
+							loading="lazy"
+						/>
+					{/if}
 				</div>
 			{/if}
 		</div>
@@ -179,15 +197,18 @@
 
 	.dual .dual1 {
 		object-position: 60%;
-		width: 40% !important;
-		aspect-ratio: 81.1/99.35;
 		margin-right: auto;
+		width: 40%;
+		aspect-ratio: 81.1/99.35;
 	}
 	.dual .dual2 {
 		margin-left: auto;
 		object-position: 100%;
 		width: 60% !important;
 		aspect-ratio: 121.65/99.35;
+	}
+	.dual .dual2.chronicled {
+		object-position: 95%;
 	}
 
 	.item .name {

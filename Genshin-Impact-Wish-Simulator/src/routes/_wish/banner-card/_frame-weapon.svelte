@@ -1,15 +1,18 @@
 <script>
 	import { fly } from 'svelte/transition';
 	import { t } from 'svelte-i18n';
-	import { course } from '$lib/store/app-stores';
+	import { course, mobileMode, activeVersion } from '$lib/store/app-stores';
 	import { positionToStyle } from '$lib/helpers/cssPosition';
 	import { highlightBannerName } from '$lib/helpers/nameText';
+	import EpitomizedButton from '../epitomized-path/WeaponButton.svelte';
+	import Dropnotes from './__dropnotes.svelte';
 
 	export let featured = {};
 	export let rateup = {};
 	export let textOffset = {};
 	const w = textOffset?.featured?.w || 29;
 	const featuredW = `--text-width: calc(${w} / 100 * var(--content-width));`;
+	$: steps = $activeVersion.patch >= 5.0 ? 1 : 2;
 </script>
 
 <div class="frame-content">
@@ -21,21 +24,14 @@
 	</h1>
 
 	<div class="info" in:fly={{ x: 10, duration: 700 }}>
-		<div class="set card-stroke">
-			{$t('wish.banner.probIncreased')}
-		</div>
-		<div class="desc bg-epitome " style="opacity: 90%;">
-			<div class="icon">
-				<i class="gi-primo-star" />
-			</div>
-			<div class="text">
-				{$t('wish.banner.wishDescription')}
-			</div>
-		</div>
-		<div class="note card-stroke">
-			{$t('wish.banner.viewDetails')}
-		</div>
+		<Dropnotes element="epitome" banner="weapon-event" />
 	</div>
+
+	{#if $mobileMode}\
+		<div class="epitomized">
+			<EpitomizedButton />
+		</div>
+	{/if}
 
 	<div
 		class="featured"
@@ -55,14 +51,14 @@
 
 	<div class="rateup" style={positionToStyle(textOffset?.rateup)} in:fly={{ x: 10, duration: 700 }}>
 		<div class="weapon-name">
-			<span>{$t(`${rateup[0]}`)},</span>
+			<span>{$t(`${rateup[0]}`)}</span>
 			<span class="etc"> {$t('wish.banner.etc')}</span>
 			<span class="up">{$t('wish.banner.up')}</span>
 		</div>
 	</div>
 
 	{#if $course.selected !== null}
-		<div class="selected" class:fill={$course.point === 2}>
+		<div class="selected" class:fill={$course.point >= steps}>
 			{$t('epitomizedPath.courseSetFor', {
 				values: { selectedCourse: $t(featured[$course.selected]?.name) }
 			})}
@@ -81,10 +77,6 @@
 		line-height: 130%;
 	}
 
-	h1 :global(span) {
-		display: block;
-	}
-
 	h1,
 	.frame-content > div {
 		text-align: left;
@@ -96,6 +88,10 @@
 		margin: 0 4%;
 		line-height: 125%;
 		font-size: calc(4.5 / 100 * var(--content-width));
+	}
+
+	:global(.mobile) h1 {
+		bottom: 71%;
 	}
 
 	:global(.zh-CN) h1,
@@ -115,51 +111,25 @@
 	}
 
 	.info {
-		left: 4%;
+		left: 0;
 		top: 40%;
-		width: 36%;
+		width: 40%;
 		display: block;
+		overflow: auto;
+		padding-left: 4%;
 	}
-	.info::after {
-		content: '';
-		display: block;
-		width: calc(0.55 / 100 * var(--content-width));
-		height: 100%;
-		background-color: #565654;
-		position: absolute;
-		left: calc(-3 / 100 * var(--content-width));
-		top: 0;
+	.info::-webkit-scrollbar {
+		display: none;
 	}
 
-	.set {
-		font-size: calc(2.4 / 100 * var(--content-width));
+	:global(.mobile) .info {
+		top: 30%;
+		height: calc(0.13 * var(--content-width));
 	}
 
-	.desc {
-		left: 7.5%;
-		top: 49.7%;
-		color: #fff;
-		min-height: calc(9 / 100 * var(--content-height));
-		display: flex;
-		align-items: center;
-		margin: calc(0.7 / 100 * var(--content-width)) 0;
-	}
-
-	.icon {
-		display: flex;
-		justify-content: center;
-		align-items: center;
-		padding: calc(1 / 100 * var(--content-width));
-		font-size: calc(1.1 / 100 * var(--content-width));
-	}
-
-	.desc .text {
-		width: calc(32.5 / 100 * var(--content-width));
-		padding: calc(0.3 / 100 * var(--content-width));
-	}
-
-	.note {
-		width: 85%;
+	.epitomized {
+		top: 59%;
+		left: 5%;
 	}
 
 	.featured {
@@ -221,7 +191,7 @@
 
 	:global(.zh-CN) .rateup .weapon-name,
 	:global(.ja-JP) .rateup .weapon-name {
-		font-size: calc(3.5 / 100 * var(--content-width));
+		font-size: calc(2.7 / 100 * var(--content-width));
 	}
 
 	span.etc {
@@ -242,6 +212,6 @@
 	}
 
 	.selected.fill {
-		background-color: #62c5ff;
+		background-color: #52b5f0;
 	}
 </style>
