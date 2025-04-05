@@ -540,6 +540,36 @@
 				"Add New Weapon: <b> Astral Vulture's Crimson Plumage (5★)</b>",
 				"Add New Weapons: <b>Sturdy Bone</b>, <b>Flower-Wreathed Feathers</b> & <b>Waveriding Whirl</b> (4★)"
 			]
+		},
+		{
+			"date": "30 Dec 2024",
+			"description": [
+				"<b>HAPPY NEW YEAR!!</b>",
+				"Add New Character: <strong> Mavuika (5★)</strong>",
+				"Add New Character: <strong> Citlali (5★)</strong>",
+				"Add New Character: <strong> Lan Yan (4★)</strong>",
+				"Add New Outfit: <b> Cherries Snow-Laden (4★)</b>",
+				"Add New Outfit: <b> New Year's Cheers (4★)</b>"
+			]
+		},
+		{
+			"date": "11 Feb 2025",
+			"description": [
+				"Add New Character: <strong> Yumemizuki Mizuki (5★)</strong>",
+				"Add New Outfit: <b> Silvershower Heartstrings (5★)</b>"
+			]
+		},
+		{
+			"date": "04 Mar 2025",
+			"description": ["Add <strong> Wriothesley 1st rerun</strong>", "Add <b> Furina 2nd rerun</b>"]
+		},
+		{
+			"date": "24 Mar 2025",
+			"featured": true,
+			"description": [
+				"Add New Character: <strong> Varesa (5★)</strong>",
+				"Add New Character: <strong> Iansan (4★)</strong>"
+			]
 		}
 	]
 }
