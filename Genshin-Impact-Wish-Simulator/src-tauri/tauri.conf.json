@@ -1,65 +1,22 @@
 {
-  "$schema": "../node_modules/@tauri-apps/cli/schema.json",
   "build": {
-    "beforeBuildCommand": "npm run build",
-    "beforeDevCommand": "npm run dev",
-    "devPath": "http://localhost:8080",
-    "distDir": "../dist"
+    "distDir": "../dist",
+    "devPath": "http://localhost:8080"
   },
   "package": {
     "productName": "genshin-impact",
     "version": "0.1.0"
   },
   "tauri": {
-    "android": {
-      "enableDebug": true
-    },
-    "allowlist": {
-      "dialog": {
-        "all": true,
-        "ask": true,
-        "confirm": true,
-        "message": true,
-        "open": true,
-        "save": true
-      },
-      "window": {
-        "setFullscreen": true
-      }
-    },
     "bundle": {
-      "active": true,
-      "category": "DeveloperTool",
-      "copyright": "",
-      "deb": {
-        "depends": []
-      },
-      "externalBin": [],
+      "identifier": "com.example.genshinimpact",
       "icon": [
         "icons/32x32.png",
         "icons/128x128.png"
-      ],
-      "identifier": "com.example.genshinimpact",
-      "longDescription": "",
-      "resources": [],
-      "shortDescription": "",
-      "targets": "all"
+      ]
     },
-    "security": {
-      "csp": null
-    },
-    "updater": {
-      "active": false
-    },
-    "windows": [
-      {
-        "fullscreen": false,
-        "height": 1000,
-        "decorations": true,
-        "resizable": true,
-        "title": "Genshin-picker",
-        "width": 1600
-      }
-    ]
+    "allowlist": {
+      "all": true
+    }
   }
 }
