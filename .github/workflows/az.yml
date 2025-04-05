@@ -10,72 +10,58 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-      # 1. 检出代码
       - name: Checkout code
         uses: actions/checkout@v4
 
-      # 2. 进入项目子目录
-      - name: Navigate to project
+      - name: Detect Tauri version
+        id: detect-tauri
         run: |
-          cd Genshin-Impact-Wish-Simulator
-          ls -la
-        shell: bash
+          if grep -q '"@tauri-apps/cli": "2' package.json; then
+            echo "TAURI_VERSION=2" >> $GITHUB_ENV
+          elif grep -q '"@tauri-apps/cli": "^1' package.json; then
+            echo "TAURI_VERSION=1" >> $GITHUB_ENV
+          else
+            echo "TAURI_VERSION=1" >> $GITHUB_ENV
+          fi
+          echo "Detected Tauri $TAURI_VERSION.x"
 
-      # 3. 设置 Java 环境
-      - name: Set up JDK 17
-        uses: actions/setup-java@v3
-        with:
-          distribution: 'temurin'
-          java-version: '17'
-
-      # 4. 安装 Android 环境
-      - name: Install Android SDK
-        uses: android-actions/setup-android@v3
-        with:
-          ndk-version: '25.1.8937393'
-
-      # 5. 设置 Node.js 环境
       - name: Setup Node.js
         uses: actions/setup-node@v4
         with:
           node-version: '20'
 
-      # 6. 安装依赖和 Tauri CLI (关键修复)
       - name: Install dependencies
-        run: |
-          npm install
-          npm install -g @tauri-apps/cli@latest
-          echo "Tauri CLI path: $(which tauri)"
+        run: npm install
         working-directory: Genshin-Impact-Wish-Simulator
 
-      # 7. 验证 Tauri 安装
-      - name: Verify Tauri
+      - name: Install Tauri CLI
         run: |
-          tauri --version
-          which tauri
-        working-directory: Genshin-Impact-Wish-Simulator
+          if [ "$TAURI_VERSION" = "2" ]; then
+            npm install -g @tauri-apps/cli@next
+          else
+            npm install -g @tauri-apps/cli@latest
+          fi
 
-      # 8. 初始化 Android 项目
+      - name: Prepare Tauri config
+        run: |
+          chmod +x ./prepare-tauri-config.sh
+          ./prepare-tauri-config.sh
+        working-directory: Genshin-Impact-Wish-Simulator
+        env:
+          TAURI_VERSION: ${{ env.TAURI_VERSION }}
+
       - name: Init Tauri Android
         run: |
           rm -rf src-tauri/target
           tauri android init
         working-directory: Genshin-Impact-Wish-Simulator
-        env:
-          ANDROID_HOME: ${{ env.ANDROID_SDK_ROOT }}
-          NDK_HOME: ${{ env.ANDROID_NDK_ROOT }}
 
-      # 9. 构建 APK
-      - name: Build APK (Debug)
+      - name: Build APK
         run: tauri android build --debug
         working-directory: Genshin-Impact-Wish-Simulator
-        env:
-          ANDROID_HOME: ${{ env.ANDROID_SDK_ROOT }}
-          NDK_HOME: ${{ env.ANDROID_NDK_ROOT }}
 
-      # 10. 上传 APK
       - name: Upload APK
         uses: actions/upload-artifact@v4
         with:
-          name: genshin-impact-debug
+          name: genshin-impact-apk
           path: Genshin-Impact-Wish-Simulator/src-tauri/target/android/debug/*.apk
