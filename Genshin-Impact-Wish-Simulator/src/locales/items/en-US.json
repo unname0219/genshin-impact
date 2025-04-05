@@ -1,4 +1,5 @@
 {
+	"a-thousand-blazing-suns": "A Thousand Blazing Suns",
 	"a-thousand-floating-dreams": "A Thousand Floating Dreams",
 	"absolution": "Absolution",
 	"akuoumaru": "Akuoumaru",
@@ -79,8 +80,10 @@
 	"splendor-of-tranquil-waters": "Splendor of Tranquil Waters",
 	"staff-of-homa": "Staff of Homa",
 	"staff-of-the-scarlet-sands": "Staff of the Scarlet Sands",
+	"starcallers-watch": "Starcaller's Watch",
 	"sturdy-bone": "Sturdy Bone",
 	"summit-shaper": "Summit Shaper",
+	"sunny-morning-sleep-in": "Sunny Morning Sleep In",
 	"surfs-up": "Surf's Up",
 	"the-alley-flash": "The Alley Flash",
 	"the-bell": "The Bell",
@@ -96,6 +99,7 @@
 	"tulaytullah_s-remembrance": "Tulaytullah's Remembrance",
 	"uraku-misugiri": "Uraku Misugiri",
 	"verdict": "Verdict",
+	"vivid-notions": "Vivid Notions",
 	"vortex-vanquisher": "Vortex Vanquisher",
 	"wavebreaker_s-fin": "Wavebreaker's Fin",
 	"wandering-evenstar": "Wandering Evenstar",
@@ -158,6 +162,10 @@
 	"chongyun": {
 		"name": "Chongyun",
 		"title": "Frozen Ardor"
+	},
+	"citlali": {
+		"name": "Citlali",
+		"title": "Obsidian Opalstar"
 	},
 	"clorinde": {
 		"name": "Clorinde",
@@ -231,6 +239,10 @@
 		"name": "Hu Tao",
 		"title": "Fragrance in Thaw"
 	},
+	"iansan": {
+		"name": "Iansan",
+		"title": "Tempered in Molten Stone"
+	},
 	"jean": {
 		"name": "Jean",
 		"title": "Dandelion Knight"
@@ -283,6 +295,10 @@
 		"name": "Kuki Shinobu",
 		"title": "Mender of Tribulations"
 	},
+	"lan-yan": {
+		"name": "Lan Yan",
+		"title": "Spring Woven From Jade"
+	},
 	"layla": {
 		"name": "Layla",
 		"title": "Fantastical Evening Star"
@@ -298,6 +314,10 @@
 	"lyney": {
 		"name": "Lyney",
 		"title": "Spectacle of Phantasmagoria"
+	},
+	"mavuika": {
+		"name": "Mavuika",
+		"title": "Night-Igniting Flame"
 	},
 	"mika": {
 		"name": "Mika",
@@ -395,6 +415,10 @@
 		"name": "Tighnari",
 		"title": "Verdant Strider"
 	},
+	"varesa": {
+		"name": "Varesa",
+		"title": "Strength in Serenity"
+	},
 	"venti": {
 		"name": "Venti",
 		"title": "Windborne Bard"
@@ -451,6 +475,10 @@
 		"name": "Yoimiya",
 		"title": "Frolicking Flames"
 	},
+	"yumemizuki-mizuki": {
+		"name": "Yumemizuki Mizuki",
+		"title": "Embrace of Enchanting Dreams"
+	},
 	"yun-jin": {
 		"name": "Yun Jin",
 		"title": "Stage Lucida"
@@ -458,5 +486,9 @@
 	"zhongli": {
 		"name": "Zhongli",
 		"title": "Vago Mundo"
+	},
+	"linjunhao": {
+		"name": "linjunhao",
+		"title": "zhecishigeshiwu"
 	}
 }

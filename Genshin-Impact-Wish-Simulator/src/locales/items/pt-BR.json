@@ -1,4 +1,5 @@
 {
+	"a-thousand-blazing-suns": "Mil Sóis Ardentes",
 	"a-thousand-floating-dreams": "Sonhos Flutuantes das Mil Noites",
 	"absolution": "Absolvição",
 	"akuoumaru": "Akuoumaru",
@@ -79,8 +80,10 @@
 	"splendor-of-tranquil-waters": "Esplendor das Águas Silenciosas",
 	"staff-of-homa": "Báculo de Homa",
 	"staff-of-the-scarlet-sands": "Báculo das Areias Escarlates",
+	"starcallers-watch": "Observatório do Chamador de Estrelas",
 	"sturdy-bone": "Osso Robusto",
 	"summit-shaper": "Cortador de Montanhas",
+	"sunny-morning-sleep-in": "Hibernação Matinal do Ano Novo",
 	"surfs-up": "Hora do Surfe",
 	"the-alley-flash": "Brilho do Beco",
 	"the-bell": "O Sino",
@@ -96,6 +99,7 @@
 	"tulaytullah_s-remembrance": "Reminiscências de Tulaytullah",
 	"uraku-misugiri": "Urakugo Rensai",
 	"verdict": "Veredito",
+	"vivid-notions": "Coração Resplandecente",
 	"vortex-vanquisher": "Perfuradora Prismática",
 	"wavebreaker_s-fin": "Barbatana do Quebra Ondas",
 	"wandering-evenstar": "Estrela Itinerante",
@@ -162,6 +166,10 @@
 	"chongyun": {
 		"name": "Chongyun",
 		"title": "Pegadas na Neve"
+	},
+	"citlali": {
+		"name": "Citlali",
+		"title": "Estrela Branca e Obsidiana"
 	},
 	"clorinde": {
 		"name": "Clorinde",
@@ -231,6 +239,10 @@
 		"name": "Hu Tao",
 		"title": "Fragrância de Ameixa Descongelada"
 	},
+	"iansan": {
+		"name": "Iansan",
+		"title": "Forjada na Pedra Ardente"
+	},
 	"jean": {
 		"name": "Jean",
 		"title": "Cavaleira de Dandelion"
@@ -283,6 +295,10 @@
 		"name": "Kuki Shinobu",
 		"title": "Erradicadora das Preocupações"
 	},
+	"lan-yan": {
+		"name": "Lan Yan",
+		"title": "Jade Primaveril"
+	},
 	"layla": {
 		"name": "Layla",
 		"title": "Contemplações da Estrela Noturna"
@@ -298,6 +314,10 @@
 	"lyney": {
 		"name": "Lyney",
 		"title": "Espetáculo Fantasmagórico"
+	},
+	"mavuika": {
+		"name": "Mavuika",
+		"title": "Chama da Noite Ardente"
 	},
 	"mika": {
 		"name": "Mika",
@@ -395,6 +415,10 @@
 		"name": "Tighnari",
 		"title": "Andarilho Verdejante"
 	},
+	"varesa": {
+		"name": "Varesa",
+		"title": "Ócio Vigoroso"
+	},
 	"venti": {
 		"name": "Venti",
 		"title": "Cantor dos Ventos Celestiais"
@@ -450,6 +474,10 @@
 	"yoimiya": {
 		"name": "Yoimiya",
 		"title": "Dança das Chamas"
+	},
+	"yumemizuki-mizuki": {
+		"name": "Yumemizuki Mizuki",
+		"title": "Sonhos Entrelaçados"
 	},
 	"yun-jin": {
 		"name": "Yun Jin",

@@ -1,4 +1,5 @@
 {
+	"a-thousand-blazing-suns": "千烈の日輪",
 	"a-thousand-floating-dreams": "千夜に浮かぶ夢",
 	"absolution": "赦罪",
 	"akuoumaru": "惡王丸",
@@ -79,8 +80,10 @@
 	"splendor-of-tranquil-waters": "静水流転の輝き",
 	"staff-of-homa": "護摩の杖",
 	"staff-of-the-scarlet-sands": "赤砂の杖",
+	"starcallers-watch": "祭星者の眺め",
 	"sturdy-bone": "ストロング・ボーン",
 	"summit-shaper": "斬山の刃",
+	"sunny-morning-sleep-in": "寝正月の初晴",
 	"surfs-up": "サーフィンタイム",
 	"the-alley-flash": "ダークアレイの閃光",
 	"the-bell": "鐘の剣",
@@ -96,6 +99,7 @@
 	"tulaytullah_s-remembrance": "トゥライトゥーラの記憶",
 	"uraku-misugiri": "有楽御簾切",
 	"verdict": "裁断",
+	"vivid-notions": "ヴィヴィッド・ハート",
 	"vortex-vanquisher": "破天の槍",
 	"wavebreaker_s-fin": "斬波のひれ長",
 	"waveriding-whirl": "波乗りの旋回",
@@ -162,6 +166,10 @@
 	"chongyun": {
 		"name": "重雲",
 		"title": "雪消の跡"
+	},
+	"citlali": {
+		"name": "シトラリ",
+		"title": "白星黒曜"
 	},
 	"clorinde": {
 		"name": "クロリンデ",
@@ -231,6 +239,10 @@
 		"name": "胡桃",
 		"title": "雪晴梅香"
 	},
+	"iansan": {
+		"name": "イアンサ",
+		"title": "百折不撓の熔岩"
+	},
 	"jean": {
 		"name": "ジン",
 		"title": "蒲公英騎士"
@@ -283,6 +295,10 @@
 		"name": "久岐忍",
 		"title": "煩悩刈除"
 	},
+	"lan-yan": {
+		"name": "藍硯",
+		"title": "春を編む翦玉"
+	},
 	"layla": {
 		"name": "レイラ",
 		"title": "綺思と夜星"
@@ -298,6 +314,10 @@
 	"lyney": {
 		"name": "リネ",
 		"title": "幻光で惑わすトリック"
+	},
+	"mavuika": {
+		"name": "マーヴィカ",
+		"title": "夜を焼き尽くす炎"
 	},
 	"mika": {
 		"name": "ミカ",
@@ -395,6 +415,10 @@
 		"name": "ティナリ",
 		"title": "緑土逍遥"
 	},
+	"varesa": {
+		"name": "ヴァレサ",
+		"title": "おっとりパワフル！"
+	},
 	"venti": {
 		"name": "ウェンティ",
 		"title": "風色の詩人"
@@ -450,6 +474,10 @@
 	"yoimiya": {
 		"name": "宵宮",
 		"title": "琉焔に舞う大輪"
+	},
+	"yumemizuki-mizuki": {
+		"name": "夢見月瑞希",
+		"title": "睦み合う綺羅の夢"
 	},
 	"yun-jin": {
 		"name": "雲菫",

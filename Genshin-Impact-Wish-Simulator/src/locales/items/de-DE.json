@@ -1,4 +1,5 @@
 {
+	"a-thousand-blazing-suns": "Die tausend flammenden Sonnen",
 	"a-thousand-floating-dreams": "Fließende Träume von tausend Nächten",
 	"absolution": "Absolution",
 	"akuoumaru": "Akuoumaru",
@@ -79,8 +80,10 @@
 	"splendor-of-tranquil-waters": "Pracht des stillen Wasser",
 	"staff-of-homa": "Homa-Stab",
 	"staff-of-the-scarlet-sands": "Stab der roten Sande",
+	"starcallers-watch": "Wacht des Sternenopfers",
 	"sturdy-bone": "Robuster Knochen",
 	"summit-shaper": "Gipfelbrecher",
+	"sunny-morning-sleep-in": "Frühjahrsschlaf",
 	"surfs-up": "Zeit fürs Wellenreiten",
 	"the-alley-flash": "Gassenleuchte",
 	"the-bell": "Glocke",
@@ -96,6 +99,7 @@
 	"tulaytullah_s-remembrance": "Tulaytullahs Erinnerung",
 	"uraku-misugiri": "Uraku Misugiri",
 	"verdict": "Urteilsspruch",
+	"vivid-notions": "Farbenfrohe Gedanken",
 	"vortex-vanquisher": "Regenbogenstecher",
 	"wavebreaker_s-fin": "Wellenbrecherflosse",
 	"wandering-evenstar": "Wandernder Abendstern",
@@ -162,6 +166,10 @@
 	"chongyun": {
 		"name": "Chongyun",
 		"title": "Spuren im schmelzenden Schnee"
+	},
+	"citlali": {
+		"name": "Citlali",
+		"title": "Sternenobsidian"
 	},
 	"clorinde": {
 		"name": "Clorinde",
@@ -231,6 +239,10 @@
 		"name": "Hu Tao",
 		"title": "Pflaumenduft bei Tauwetter"
 	},
+	"iansan": {
+		"name": "Iansan",
+		"title": "Von geschmolzenem Gestein gehärtet"
+	},
 	"jean": {
 		"name": "Jean",
 		"title": "Löwenzahnritter"
@@ -283,6 +295,10 @@
 		"name": "Kuki Shinobu",
 		"title": "Besänftigerin des Leids"
 	},
+	"lan-yan": {
+		"name": "Lan Yan",
+		"title": "Aus Jade geflochtener Frühling"
+	},
 	"layla": {
 		"name": "Layla",
 		"title": "Verträumer Abendstern"
@@ -298,6 +314,10 @@
 	"lyney": {
 		"name": "Lyney",
 		"title": "Das Spektakel von Fantasmagoria"
+	},
+	"mavuika": {
+		"name": "Mavuika",
+		"title": "Flamme der Nachterhellung"
 	},
 	"mika": {
 		"name": "Mika",
@@ -395,6 +415,10 @@
 		"name": "Tighnari",
 		"title": "Wanderer im Grünen"
 	},
+	"varesa": {
+		"name": "Varesa",
+		"title": "Gelassene Stärke"
+	},
 	"venti": {
 		"name": "Venti",
 		"title": "Wandernder Barde"
@@ -450,6 +474,10 @@
 	"yoimiya": {
 		"name": "Yoimiya",
 		"title": "Ausgelassene Flammen"
+	},
+	"yumemizuki-mizuki": {
+		"name": "Yumemizuki Mizuki",
+		"title": "Umarmt von süßen Träumen"
 	},
 	"yun-jin": {
 		"name": "Yun Jin",
