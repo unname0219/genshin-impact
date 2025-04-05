@@ -16,7 +16,9 @@ jobs:
 
       # 2. 进入项目子目录
       - name: Navigate to project
-        run: cd Genshin-Impact-Wish-Simulator && ls -la
+        run: |
+          cd Genshin-Impact-Wish-Simulator
+          ls -la
         shell: bash
 
       # 3. 设置 Java 环境
@@ -30,34 +32,33 @@ jobs:
       - name: Install Android SDK
         uses: android-actions/setup-android@v3
         with:
-          ndk-version: '25.1.8937393'  # 指定 NDK 版本
+          ndk-version: '25.1.8937393'
 
-      # 5. 设置 Rust 工具链
-      - name: Install Rust
-        uses: actions-rs/toolchain@v1
-        with:
-          profile: minimal
-          toolchain: stable
-          target: aarch64-linux-android
-          override: true
-
-      # 6. 设置 Node.js
-      - name: Install Node.js
+      # 5. 设置 Node.js 环境
+      - name: Setup Node.js
         uses: actions/setup-node@v4
         with:
           node-version: '20'
 
-      # 7. 安装依赖
+      # 6. 安装依赖和 Tauri CLI (关键修复)
       - name: Install dependencies
         run: |
           npm install
-          npm install @tauri-apps/cli@latest
+          npm install -g @tauri-apps/cli@latest
+          echo "Tauri CLI path: $(which tauri)"
         working-directory: Genshin-Impact-Wish-Simulator
 
-      # 8. 初始化 Tauri Android
+      # 7. 验证 Tauri 安装
+      - name: Verify Tauri
+        run: |
+          tauri --version
+          which tauri
+        working-directory: Genshin-Impact-Wish-Simulator
+
+      # 8. 初始化 Android 项目
       - name: Init Tauri Android
         run: |
-          rm -rf src-tauri/target  # 清理旧构建
+          rm -rf src-tauri/target
           tauri android init
         working-directory: Genshin-Impact-Wish-Simulator
         env:
