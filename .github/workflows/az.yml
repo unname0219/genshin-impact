@@ -23,40 +23,29 @@ jobs:
         with:
           node-version: '20'
 
-      - name: Install dependencies
-        run: npm install
-        working-directory: Genshin-Impact-Wish-Simulator
-
       - name: Install Tauri CLI
         run: npm install -g @tauri-apps/cli@next
 
-      - name: Create fresh config
+      - name: Create correct config
         run: |
-          # 创建最小化合法配置
           cat << 'EOF' > Genshin-Impact-Wish-Simulator/src-tauri/tauri.conf.json
           {
-            "package": {
-              "productName": "genshin-impact",
-              "version": "0.1.0"
+            "$schema": "../node_modules/@tauri-apps/cli/schema.json",
+            "productName": "genshin-impact",
+            "version": "0.1.0",
+            "build": {
+              "distDir": "../dist",
+              "devPath": "http://localhost:8080"
             },
-            "tauri": {
-              "bundle": {
-                "identifier": "com.example.genshinimpact"
-              }
+            "app": {
+              "bundleIdentifier": "com.example.genshinimpact"
             }
           }
           EOF
 
-          # 创建必要的目录结构
-          mkdir -p Genshin-Impact-Wish-Simulator/src-tauri/icons
-          touch Genshin-Impact-Wish-Simulator/src-tauri/icons/32x32.png
-
-      - name: Verify config
-        run: |
-          echo "当前配置文件内容："
+          # 验证配置文件
+          echo "生成的配置文件内容："
           cat Genshin-Impact-Wish-Simulator/src-tauri/tauri.conf.json
-          echo -e "\n目录结构："
-          ls -la Genshin-Impact-Wish-Simulator/src-tauri/
 
       - name: Init Android
         run: |
