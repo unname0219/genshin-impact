@@ -1,22 +1,5 @@
 {
-  "$schema": "../node_modules/@tauri-apps/cli/schema.json",
-  "productName": "genshin-impact",
-  "version": "0.1.0",
-  "build": {
-    "distDir": "../dist",
-    "devPath": "http://localhost:3000",
-    "beforeDevCommand": "npm run dev",
-    "beforeBuildCommand": "npm run build"
-  },
-  "app": {
-    "bundleIdentifier": "com.example.genshinimpact",
-    "icons": {
-      "default": "icons/128x128.png"
-    }
-  },
-  "tauri": {
-    "allowlist": {
-      "all": true
-    }
-  }
-}
+     "identifier": "com.example.genshinimpact",
+     "productName": "genshin-impact", 
+     "version": "0.1.0"
+   }
