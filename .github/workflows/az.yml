@@ -14,8 +14,8 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v4
 
-      # 2. 进入项目子目录（关键修复）
-      - name: Navigate to project folder
+      # 2. 进入项目子目录
+      - name: Navigate to project
         run: cd Genshin-Impact-Wish-Simulator && ls -la
         shell: bash
 
@@ -26,17 +26,19 @@ jobs:
           distribution: 'temurin'
           java-version: '17'
 
-      # 4. 设置 Android 环境
+      # 4. 安装 Android 环境
       - name: Install Android SDK
         uses: android-actions/setup-android@v3
+        with:
+          ndk-version: '25.1.8937393'  # 指定 NDK 版本
 
-      # 5. 设置 Rust 环境（注意目标架构）
+      # 5. 设置 Rust 工具链
       - name: Install Rust
         uses: actions-rs/toolchain@v1
         with:
           profile: minimal
           toolchain: stable
-          target: aarch64-linux-android  # ARM64 设备
+          target: aarch64-linux-android
           override: true
 
       # 6. 设置 Node.js
@@ -45,17 +47,25 @@ jobs:
         with:
           node-version: '20'
 
-      # 7. 安装依赖（现在会在子目录中运行）
+      # 7. 安装依赖
       - name: Install dependencies
-        run: npm install
+        run: |
+          npm install
+          npm install @tauri-apps/cli@latest
         working-directory: Genshin-Impact-Wish-Simulator
 
-      # 8. 安装 Tauri CLI
-      - name: Install Tauri CLI
-        run: npm install -g @tauri-apps/cli
+      # 8. 初始化 Tauri Android
+      - name: Init Tauri Android
+        run: |
+          rm -rf src-tauri/target  # 清理旧构建
+          tauri android init
+        working-directory: Genshin-Impact-Wish-Simulator
+        env:
+          ANDROID_HOME: ${{ env.ANDROID_SDK_ROOT }}
+          NDK_HOME: ${{ env.ANDROID_NDK_ROOT }}
 
-      # 9. 构建 Android APK
-      - name: Build Android APK
+      # 9. 构建 APK
+      - name: Build APK (Debug)
         run: tauri android build --debug
         working-directory: Genshin-Impact-Wish-Simulator
         env:
@@ -63,8 +73,8 @@ jobs:
           NDK_HOME: ${{ env.ANDROID_NDK_ROOT }}
 
       # 10. 上传 APK
-      - name: Upload APK Artifact
+      - name: Upload APK
         uses: actions/upload-artifact@v4
         with:
-          name: android-debug-apk
+          name: genshin-impact-debug
           path: Genshin-Impact-Wish-Simulator/src-tauri/target/android/debug/*.apk
