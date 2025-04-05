@@ -16,14 +16,12 @@ jobs:
       - name: Detect Tauri version
         id: detect-tauri
         run: |
-          if grep -q '"@tauri-apps/cli": "2' package.json; then
+          if grep -q '"@tauri-apps/cli": "2' Genshin-Impact-Wish-Simulator/package.json; then
             echo "TAURI_VERSION=2" >> $GITHUB_ENV
-          elif grep -q '"@tauri-apps/cli": "^1' package.json; then
-            echo "TAURI_VERSION=1" >> $GITHUB_ENV
           else
             echo "TAURI_VERSION=1" >> $GITHUB_ENV
           fi
-          echo "Detected Tauri $TAURI_VERSION.x"
+          echo "Using Tauri $TAURI_VERSION.x"
 
       - name: Setup Node.js
         uses: actions/setup-node@v4
@@ -42,23 +40,61 @@ jobs:
             npm install -g @tauri-apps/cli@latest
           fi
 
-      - name: Prepare Tauri config
+      - name: Generate Config File
         run: |
-          chmod +x ./prepare-tauri-config.sh
-          ./prepare-tauri-config.sh
-        working-directory: Genshin-Impact-Wish-Simulator
-        env:
-          TAURI_VERSION: ${{ env.TAURI_VERSION }}
+          CONFIG_FILE="Genshin-Impact-Wish-Simulator/src-tauri/tauri.conf.json"
+          if [ "$TAURI_VERSION" = "2" ]; then
+            echo 'Creating Tauri 2.x config...'
+            echo '{
+              "$schema": "../node_modules/@tauri-apps/cli/schema.json",
+              "productName": "genshin-impact",
+              "version": "0.1.0",
+              "build": {
+                "frontend": {
+                  "distDir": "../dist",
+                  "devPath": "http://localhost:8080"
+                }
+              },
+              "tauri": {
+                "bundle": {
+                  "identifier": "com.example.genshinimpact"
+                }
+              }
+            }' > $CONFIG_FILE
+          else
+            echo 'Creating Tauri 1.x config...'
+            echo '{
+              "build": {
+                "distDir": "../dist",
+                "devPath": "http://localhost:8080"
+              },
+              "package": {
+                "productName": "genshin-impact",
+                "version": "0.1.0"
+              },
+              "tauri": {
+                "bundle": {
+                  "identifier": "com.example.genshinimpact",
+                  "icon": ["icons/32x32.png", "icons/128x128.png"]
+                },
+                "allowlist": {
+                  "all": true
+                }
+              }
+            }' > $CONFIG_FILE
+          fi
+          cat $CONFIG_FILE
 
       - name: Init Tauri Android
         run: |
+          cd Genshin-Impact-Wish-Simulator
           rm -rf src-tauri/target
           tauri android init
-        working-directory: Genshin-Impact-Wish-Simulator
 
       - name: Build APK
-        run: tauri android build --debug
-        working-directory: Genshin-Impact-Wish-Simulator
+        run: |
+          cd Genshin-Impact-Wish-Simulator
+          tauri android build --debug
 
       - name: Upload APK
         uses: actions/upload-artifact@v4
