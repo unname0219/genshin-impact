@@ -13,11 +13,20 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v4
 
+      - name: Clean existing config
+        run: |
+          rm -f Genshin-Impact-Wish-Simulator/src-tauri/tauri.conf.json
+          rm -f Genshin-Impact-Wish-Simulator/src-tauri/tauri.conf.json.bak
+
       - name: Detect Tauri version
         id: detect-tauri
         run: |
-          if grep -q '"@tauri-apps/cli": "2' Genshin-Impact-Wish-Simulator/package.json; then
-            echo "TAURI_VERSION=2" >> $GITHUB_ENV
+          if [ -f "Genshin-Impact-Wish-Simulator/package.json" ]; then
+            if grep -q '"@tauri-apps/cli": "2' Genshin-Impact-Wish-Simulator/package.json; then
+              echo "TAURI_VERSION=2" >> $GITHUB_ENV
+            else
+              echo "TAURI_VERSION=1" >> $GITHUB_ENV
+            fi
           else
             echo "TAURI_VERSION=1" >> $GITHUB_ENV
           fi
@@ -40,11 +49,16 @@ jobs:
             npm install -g @tauri-apps/cli@latest
           fi
 
-      - name: Generate Config File
+      - name: Generate and Validate Config
         run: |
-          CONFIG_FILE="Genshin-Impact-Wish-Simulator/src-tauri/tauri.conf.json"
+          CONFIG_DIR="Genshin-Impact-Wish-Simulator/src-tauri"
+          CONFIG_FILE="$CONFIG_DIR/tauri.conf.json"
+          
+          # 确保目录存在
+          mkdir -p $CONFIG_DIR
+          
+          # 生成全新配置
           if [ "$TAURI_VERSION" = "2" ]; then
-            echo 'Creating Tauri 2.x config...'
             echo '{
               "$schema": "../node_modules/@tauri-apps/cli/schema.json",
               "productName": "genshin-impact",
@@ -62,7 +76,6 @@ jobs:
               }
             }' > $CONFIG_FILE
           else
-            echo 'Creating Tauri 1.x config...'
             echo '{
               "build": {
                 "distDir": "../dist",
@@ -83,7 +96,16 @@ jobs:
               }
             }' > $CONFIG_FILE
           fi
+          
+          # 验证配置
+          echo "Generated config:"
           cat $CONFIG_FILE
+          echo -e "\nValidating config..."
+          if [ "$TAURI_VERSION" = "2" ]; then
+            tauri config validate --schema ../node_modules/@tauri-apps/cli/schema.json
+          else
+            tauri config validate
+          fi
 
       - name: Init Tauri Android
         run: |
